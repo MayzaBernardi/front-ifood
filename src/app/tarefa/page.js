@@ -1,22 +1,25 @@
 'use client';
 import { useState } from "react";
 import Link from "next/link";
-import { FcCheckmark } from "react-icons/fc";
-import { MdDelete, MdMenu, MdClose } from "react-icons/md"; 
+import { MdClose } from "react-icons/md"; 
 import { RiMenuAddFill, RiHome4Line } from "react-icons/ri"; 
 import { LiaClipboardListSolid } from "react-icons/lia";
 import { FaHamburger } from "react-icons/fa";
 import { IoSearchOutline } from "react-icons/io5";
 import "../globals.css";
-
-const itensPorPagina = 5;
+import TableComponent from "@/components/TableComponent";
 
 export default function TarefaPage() {
-    const [tarefas, setTarefas] = useState([]);
+    const [tarefas, setTarefas] = useState([
+        { id: 1, texto: "Comprar ingredientes para o jantar", concluida: false },
+        { id: 2, texto: "Lavar a louça", concluida: true },
+        { id: 3, texto: "Organizar a despensa", concluida: false },
+    ]);
     const [novaTarefa, setNovaTarefa] = useState("");
     const [busca, setBusca] = useState("");
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [paginaAtual, setPaginaAtual] = useState(1);
+    const [itensPorPagina, setItensPorPagina] = useState(5);
 
     const tarefasFiltradas = tarefas.filter(tarefa => 
         tarefa.texto.toLowerCase().includes(busca.toLowerCase())
@@ -30,7 +33,7 @@ export default function TarefaPage() {
     const adicionarTarefa = () => {
         if (novaTarefa.trim() === "") return;
         const task = {
-            id: Date.now(),
+            id: tarefas.length > 0 ? Math.max(...tarefas.map(t => t.id)) + 1 : 1,
             texto: novaTarefa,
             concluida: false,
         };
@@ -50,8 +53,13 @@ export default function TarefaPage() {
         }
     };
 
+    const handlePageSizeChange = (e) => {
+        setItensPorPagina(Number(e.target.value));
+        setPaginaAtual(1);
+    };
+
     return (
-        <div className="flex min-h-screen bg-gray-200 font-sans text-[#3e3e3e] relative">
+        <div className="flex min-h-screen bg-[#A0D9D9] font-sans text-[#3e3e3e] relative">
             <button 
                 onClick={() => setSidebarOpen(true)}
                 className="absolute top-6 left-6 p-2 bg-white rounded-lg shadow-md hover:bg-gray-100 z-10"
@@ -63,7 +71,8 @@ export default function TarefaPage() {
                 <>
                     <div 
                         className="fixed inset-0 bg-black/40 z-40 transition-opacity"
-                        onClick={() => setSidebarOpen(false)}/>
+                        onClick={() => setSidebarOpen(false)}
+                    />
                     <aside className="fixed left-0 top-0 h-full w-64 bg-white shadow-2xl z-50 flex flex-col p-6">
                         <div className="flex items-center justify-between mb-10">
                             <div className="flex items-center gap-2 text-[#0c0304]">
@@ -91,8 +100,8 @@ export default function TarefaPage() {
                     Minhas Tarefas
                 </h1>
                 
-                <div className="w-full max-w-2xl bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <div className="flex gap-2 mb-4 items-center border border-gray-200 rounded-lg px-3 focus-within:border-[#ea1d2c] bg-gray-50">
+                <div className="w-full max-w-3xl bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex gap-2 mb-4 items-center border border-gray-200 rounded-lg px-3 focus-within:border-emerald-600 bg-gray-50">
                         <IoSearchOutline className="text-gray-400" />
                         <input
                             type="text"
@@ -111,80 +120,34 @@ export default function TarefaPage() {
                             value={novaTarefa}
                             onChange={(e) => setNovaTarefa(e.target.value)}
                             type="text"
-                            className="flex-1 px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#ea1d2c]"
+                            className="flex-1 px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-emerald-600"
                             placeholder="Adicione uma nova tarefa..."
                         />
                         <button 
                             onClick={adicionarTarefa}
-                            className="bg-emerald-600 px-5 py-4 rounded-lg font-bold hover:opacity-90 transition-all"
+                            className="bg-[#D9C589] text-white px-5 py-4 rounded-lg font-bold hover:opacity-90 transition-all"
                         >
                             <RiMenuAddFill />
                         </button>
                     </div>
 
-                    <div className="overflow-hidden rounded-xl border border-gray-300">
-                        <table className="w-full text-left border-collapse">
-                            <thead className="bg-gray-400 text-gray-200 text-xs uppercase">
-                                <tr>
-                                    <th className="px-4 py-3 font-semibold">Tarefa</th>
-                                    <th className="px-4 py-3 font-semibold text-center w-24">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {tarefasPaginadas.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="2" className="px-4 py-8 text-center text-gray-400 italic">
-                                            {busca ? "Nenhuma tarefa encontrada." : "Nenhuma tarefa cadastrada."}
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    tarefasPaginadas.map((tarefa) => (
-                                        <tr key={tarefa.id} className="hover:bg-gray-50">
-                                            <td className={`px-4 py-4 ${tarefa.concluida ? 'line-through text-gray-400' : 'text-gray-700 font-medium'}`}>
-                                                {tarefa.texto}
-                                            </td>
-                                            <td className="px-4 py-4 flex justify-center gap-2">
-                                                <button
-                                                    onClick={() => alternarConclusao(tarefa.id)}
-                                                    className={`p-2 rounded-full transition-colors ${tarefa.concluida ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 hover:bg-green-500 hover:text-white'}`}
-                                                >
-                                                    <FcCheckmark />
-                                                </button>
-                                                <button
-                                                    onClick={() => excluirTarefa(tarefa.id)}
-                                                    className="p-2 rounded-full bg-gray-100 text-gray-500 hover:bg-[#ea1d2c] hover:text-white transition-colors"
-                                                >
-                                                    <MdDelete />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {tarefasFiltradas.length > itensPorPagina && (
-                        <div className="flex justify-center items-center gap-4 mt-6">
-                            <button
-                                onClick={() => setPaginaAtual(prev => Math.max(prev - 1, 1))}
-                                disabled={paginaAtual === 1}
-                                className="px-4 py-2 bg-white border rounded-lg disabled:opacity-30 hover:bg-gray-50 text-sm font-bold shadow-sm"
-                            >
-                                Anterior
-                            </button>
-                            <span className="text-sm font-medium text-gray-600">
-                                {paginaAtual} / {totalPages}
-                            </span>
-                            <button
-                                onClick={() => setPaginaAtual(prev => Math.min(prev + 1, totalPages))}
-                                disabled={paginaAtual === totalPages}
-                                className="px-4 py-2 bg-white border rounded-lg disabled:opacity-30 hover:bg-gray-50 text-sm font-bold shadow-sm"
-                            >
-                                Próxima
-                            </button>
-                        </div>
-                    )}
+                    <TableComponent 
+                        tarefasPaginadas={tarefasPaginadas}
+                        busca={busca}
+                        alternarConclusao={alternarConclusao}
+                        excluirTarefa={excluirTarefa}
+                        tarefasFiltradasLength={tarefasFiltradas.length}
+                        itensPorPagina={itensPorPagina}
+                        handlePageSizeChange={handlePageSizeChange}
+                        indexOfFirstItem={indexOfFirstItem}
+                        indexOfLastItem={indexOfLastItem}
+                        paginaAtual={paginaAtual}
+                        setPaginaAtual={setPaginaAtual}
+                        totalPages={totalPages}
+                        mostrarId={true}
+                        mostrarTarefa={true}
+                        mostrarAcoes={true}
+                    />
                 </div>
             </main>
         </div>
