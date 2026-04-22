@@ -1,25 +1,34 @@
 'use client';
 import { useState } from "react";
-import Link from "next/link";
-import { MdClose } from "react-icons/md"; 
-import { RiMenuAddFill, RiHome4Line } from "react-icons/ri"; 
-import { LiaClipboardListSolid } from "react-icons/lia";
-import { FaHamburger } from "react-icons/fa";
 import { IoSearchOutline } from "react-icons/io5";
-import "../globals.css";
+import { FcCheckmark } from "react-icons/fc";
+import { MdDelete } from "react-icons/md";
+import { RiMenuAddFill, RiEdit2Fill } from "react-icons/ri";
 import TableComponent from "@/components/TableComponent";
+import ModalComponent from "@/components/ModalComponent";
 
 export default function TarefaPage() {
     const [tarefas, setTarefas] = useState([
-        { id: 1, texto: "Comprar ingredientes para o jantar", concluida: false },
-        { id: 2, texto: "Lavar a louça", concluida: true },
-        { id: 3, texto: "Organizar a despensa", concluida: false },
+        { id: 1, texto: "Comprar ingredientes para o jantar", responsavel: "João", concluida: false },
+        { id: 2, texto: "Lavar a louça", responsavel: "Maria", concluida: true },
     ]);
     const [novaTarefa, setNovaTarefa] = useState("");
+    const [responsavelTarefa, setResponsavelTarefa] = useState("");
     const [busca, setBusca] = useState("");
-    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [paginaAtual, setPaginaAtual] = useState(1);
     const [itensPorPagina, setItensPorPagina] = useState(5);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    const [tarefaEditando, setTarefaEditando] = useState(null);
+
+    const mostrarId = true;
+    const mostrarTarefa = true;
+    const mostrarAcoes = true;
+
+    const colunasAtivas = [];
+    if (mostrarId) colunasAtivas.push("ID");
+    if (mostrarTarefa) colunasAtivas.push("Tarefa");
+    if (mostrarAcoes) colunasAtivas.push("Ações");
 
     const tarefasFiltradas = tarefas.filter(tarefa => 
         tarefa.texto.toLowerCase().includes(busca.toLowerCase())
@@ -30,16 +39,48 @@ export default function TarefaPage() {
     const indexOfFirstItem = indexOfLastItem - itensPorPagina;
     const tarefasPaginadas = tarefasFiltradas.slice(indexOfFirstItem, indexOfLastItem);
 
-    const adicionarTarefa = () => {
-        if (novaTarefa.trim() === "") return;
-        const task = {
-            id: tarefas.length > 0 ? Math.max(...tarefas.map(t => t.id)) + 1 : 1,
-            texto: novaTarefa,
-            concluida: false,
-        };
-        setTarefas([...tarefas, task]);
+    const abrirModalNovo = () => {
+        setTarefaEditando(null);
         setNovaTarefa("");
-        setPaginaAtual(1);
+        setResponsavelTarefa("");
+        setIsModalOpen(true);
+    };
+
+    const abrirModalEdicao = (tarefa) => {
+        setTarefaEditando(tarefa.id);
+        setNovaTarefa(tarefa.texto);
+        setResponsavelTarefa(tarefa.responsavel || "");
+        setIsModalOpen(true);
+    };
+
+    const fecharModal = () => {
+        setIsModalOpen(false);
+        setTarefaEditando(null);
+        setNovaTarefa("");
+        setResponsavelTarefa("");
+    };
+
+    const salvarTarefa = () => {
+        if (novaTarefa.trim() === "") return;
+
+        if (tarefaEditando !== null) {
+            setTarefas(tarefas.map(t => 
+                t.id === tarefaEditando 
+                    ? { ...t, texto: novaTarefa, responsavel: responsavelTarefa } 
+                    : t
+            ));
+        } else {
+            const task = {
+                id: tarefas.length > 0 ? Math.max(...tarefas.map(t => t.id)) + 1 : 1,
+                texto: novaTarefa,
+                responsavel: responsavelTarefa,
+                concluida: false,
+            };
+            setTarefas([...tarefas, task]);
+            setPaginaAtual(1);
+        }
+
+        fecharModal();
     };
 
     const alternarConclusao = (id) => {
@@ -53,103 +94,111 @@ export default function TarefaPage() {
         }
     };
 
-    const handlePageSizeChange = (e) => {
-        setItensPorPagina(Number(e.target.value));
-        setPaginaAtual(1);
-    };
-
     return (
-        <div className="flex min-h-screen bg-[#A0D9D9] font-sans text-[#3e3e3e] relative">
-            <button 
-                onClick={() => setSidebarOpen(true)}
-                className="absolute top-6 left-6 p-2 bg-white rounded-lg shadow-md hover:bg-gray-100 z-10"
-            >
-                <FaHamburger className="text-[#000000]" />
-            </button>
-
-            {sidebarOpen && (
-                <>
-                    <div 
-                        className="fixed inset-0 bg-black/40 z-40 transition-opacity"
-                        onClick={() => setSidebarOpen(false)}
-                    />
-                    <aside className="fixed left-0 top-0 h-full w-64 bg-white shadow-2xl z-50 flex flex-col p-6">
-                        <div className="flex items-center justify-between mb-10">
-                            <div className="flex items-center gap-2 text-[#0c0304]">
-                                <LiaClipboardListSolid size={32} />
-                                <span className="font-bold text-xl uppercase italic">Menu</span>
-                            </div>
-                            <button onClick={() => setSidebarOpen(false)}>
-                                <MdClose size={24} className="text-gray-500 hover:text-black" />
-                            </button>
+        <div className="flex h-screen bg-gray-200">
+            <main className="flex-1 flex flex-col items-center p-8 pt-20 relative">
+                <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+                    <div className="flex justify-between gap-4 mb-8">
+                        <div className="flex-1 flex items-center border border-gray-300 rounded-lg px-3 focus-within:border-blue-700 focus-within:ring-1 focus-within:ring-blue-700 bg-white transition-all">
+                            <IoSearchOutline className="text-gray-500" />
+                            <input
+                                type="text"
+                                value={busca}
+                                onChange={(e) => {
+                                    setBusca(e.target.value);
+                                    setPaginaAtual(1);
+                                }}
+                                className="flex-1 py-3 px-2 bg-transparent focus:outline-none text-gray-900 placeholder-gray-400"
+                                placeholder="Pesquise pela sua tarefa..."
+                            />
                         </div>
-                        <nav className="flex flex-col gap-4">
-                            <Link href="/" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 font-medium">
-                                <RiHome4Line size={20} /> Home
-                            </Link>
-                            <Link href="/tarefas" className="flex items-center gap-3 p-3 rounded-lg bg-red-50 text-[#140f0f] font-bold">
-                                <LiaClipboardListSolid size={20} /> Minhas Tarefas
-                            </Link>
-                        </nav>
-                    </aside>
-                </>
-            )}
 
-            <main className="flex-1 flex flex-col items-center p-8 pt-20">
-                <h1 className="text-center text-4xl font-bold text-[#202709] mb-4"> 
-                    Minhas Tarefas
-                </h1>
-                
-                <div className="w-full max-w-3xl bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <div className="flex gap-2 mb-4 items-center border border-gray-200 rounded-lg px-3 focus-within:border-emerald-600 bg-gray-50">
-                        <IoSearchOutline className="text-gray-400" />
-                        <input
-                            type="text"
-                            value={busca}
-                            onChange={(e) => {
-                                setBusca(e.target.value);
-                                setPaginaAtual(1);
-                            }}
-                            className="flex-1 py-3 bg-transparent focus:outline-none"
-                            placeholder="Pesquise pela sua tarefa..."
-                        />
-                    </div>
-                    
-                    <div className="flex gap-2 mb-8">
-                        <input
-                            value={novaTarefa}
-                            onChange={(e) => setNovaTarefa(e.target.value)}
-                            type="text"
-                            className="flex-1 px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-emerald-600"
-                            placeholder="Adicione uma nova tarefa..."
-                        />
                         <button 
-                            onClick={adicionarTarefa}
-                            className="bg-[#D9C589] text-white px-5 py-4 rounded-lg font-bold hover:opacity-90 transition-all"
+                            onClick={abrirModalNovo}
+                            className="bg-blue-700 text-white px-5 py-3 rounded-lg font-bold hover:bg-blue-800 shadow-sm transition-all flex items-center gap-2"
                         >
-                            <RiMenuAddFill />
+                            <RiMenuAddFill size={20} />
+                            <span>Nova Tarefa</span>
                         </button>
                     </div>
 
                     <TableComponent 
-                        tarefasPaginadas={tarefasPaginadas}
-                        busca={busca}
-                        alternarConclusao={alternarConclusao}
-                        excluirTarefa={excluirTarefa}
-                        tarefasFiltradasLength={tarefasFiltradas.length}
+                        colunas={colunasAtivas}
+                        dadosLength={tarefasFiltradas.length}
                         itensPorPagina={itensPorPagina}
-                        handlePageSizeChange={handlePageSizeChange}
+                        handlePageSizeChange={(e) => {
+                            setItensPorPagina(Number(e.target.value));
+                            setPaginaAtual(1);
+                        }}
                         indexOfFirstItem={indexOfFirstItem}
                         indexOfLastItem={indexOfLastItem}
                         paginaAtual={paginaAtual}
                         setPaginaAtual={setPaginaAtual}
                         totalPages={totalPages}
-                        mostrarId={true}
-                        mostrarTarefa={true}
-                        mostrarAcoes={true}
-                    />
+                    >
+                        {tarefasPaginadas.length === 0 ? (
+                            <tr>
+                                <td colSpan={colunasAtivas.length || 1} className="px-4 py-8 text-center text-gray-500 italic">
+                                    {busca ? "Nenhuma tarefa encontrada." : "Nenhuma tarefa cadastrada."}
+                                </td>
+                            </tr>
+                        ) : (
+                            tarefasPaginadas.map((tarefa) => (
+                                <tr key={tarefa.id} className="hover:bg-gray-50 border-b border-gray-100 last:border-0">
+                                    {mostrarId && (
+                                        <td className="px-4 py-4 text-center text-gray-500 font-medium">
+                                            {tarefa.id}
+                                        </td>
+                                    )}
+
+                                    {mostrarTarefa && (
+                                        <td className={`px-4 py-4 ${tarefa.concluida ? 'line-through text-gray-400' : 'text-gray-800 font-medium'}`}>
+                                            <div>{tarefa.texto}</div>
+                                            {tarefa.responsavel && (
+                                                <div className="text-xs text-gray-500 mt-1">Responsável: {tarefa.responsavel}</div>
+                                            )}
+                                        </td>
+                                    )}
+
+                                    {mostrarAcoes && (
+                                        <td className="px-4 py-4 flex justify-center gap-2">
+                                            <button
+                                                onClick={() => alternarConclusao(tarefa.id)}
+                                                className={`p-2 rounded-full transition-colors ${tarefa.concluida ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 hover:bg-green-500 hover:text-white'}`}
+                                            >
+                                                <FcCheckmark />
+                                            </button>
+                                            <button
+                                                onClick={() => abrirModalEdicao(tarefa)}
+                                                className="p-2 rounded-full bg-gray-100 text-gray-500 hover:bg-blue-500 hover:text-white transition-colors"
+                                            >
+                                                <RiEdit2Fill />
+                                            </button>
+                                            <button
+                                                onClick={() => excluirTarefa(tarefa.id)}
+                                                className="p-2 rounded-full bg-gray-100 text-gray-500 hover:bg-red-500 hover:text-white transition-colors"
+                                            >
+                                                <MdDelete />
+                                            </button>
+                                        </td>
+                                    )}
+                                </tr>
+                            ))
+                        )}
+                    </TableComponent>
                 </div>
             </main>
+
+            <ModalComponent 
+                isOpen={isModalOpen}
+                onClose={fecharModal}
+                novaTarefa={novaTarefa}
+                setNovaTarefa={setNovaTarefa}
+                responsavelTarefa={responsavelTarefa}
+                setResponsavelTarefa={setResponsavelTarefa}
+                salvarTarefa={salvarTarefa}
+                isEditing={tarefaEditando !== null}
+            />
         </div>
     );
 }
