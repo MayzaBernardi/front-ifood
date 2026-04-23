@@ -15,7 +15,7 @@ export const metadata = {
 
 export default function TarefaLayout({ children }) {
     return (
-        <div className={`${poppins.className} text-[#3e3e3e] bg-[#d4d4d4] min-h-screen flex flex-col relative`}>
+        <div className={`${poppins.className} text-[#3092aa] bg-[#f0ebeb] min-h-screen flex flex-col relative`}>
             <Navigation />
             <div className="flex-1 flex flex-col">
                 {children}

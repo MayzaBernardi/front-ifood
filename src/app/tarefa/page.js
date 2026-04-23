@@ -1,24 +1,46 @@
 'use client';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoSearchOutline } from "react-icons/io5";
 import { FcCheckmark } from "react-icons/fc";
 import { MdDelete } from "react-icons/md";
 import { RiMenuAddFill, RiEdit2Fill } from "react-icons/ri";
 import TableComponent from "@/components/TableComponent";
 import ModalComponent from "@/components/ModalComponent";
+import api from "@/utils/axios";
 
 export default function TarefaPage() {
-    const [tarefas, setTarefas] = useState([
-        { id: 1, texto: "Comprar ingredientes para o jantar", responsavel: "João", concluida: false },
-        { id: 2, texto: "Lavar a louça", responsavel: "Maria", concluida: true },
-    ]);
+    
+    const [tarefas, setTarefas] = useState([]);
+
+        useEffect(() => {
+            async function getTarefas() {
+            try {
+                const resposta = await api.get('/tarefa/get-all');
+                
+                const tarefasFormatadas = resposta.data.map((itemDoBanco) => ({
+                    id: itemDoBanco.id, 
+                    texto: itemDoBanco.tarefa, 
+                    responsavel: itemDoBanco.responsavel,
+                    arquivo: itemDoBanco.arquivo,
+                    criadoEm: itemDoBanco.created_at,
+                    atualizadoEm: itemDoBanco.updated_at
+                }));
+                console.log("RESPOSTA BRUTA DA API:", resposta.data);
+
+                setTarefas(tarefasFormatadas);      
+            } catch (error) {
+                console.log(error.message);
+            }
+        }
+            getTarefas()
+        }, []);
+
     const [novaTarefa, setNovaTarefa] = useState("");
     const [responsavelTarefa, setResponsavelTarefa] = useState("");
     const [busca, setBusca] = useState("");
     const [paginaAtual, setPaginaAtual] = useState(1);
     const [itensPorPagina, setItensPorPagina] = useState(5);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
     const [tarefaEditando, setTarefaEditando] = useState(null);
 
     const mostrarId = true;
@@ -68,7 +90,8 @@ export default function TarefaPage() {
                 t.id === tarefaEditando 
                     ? { ...t, texto: novaTarefa, responsavel: responsavelTarefa } 
                     : t
-            ));
+                ));
+            window.alert("Tarefa atualizada com sucesso!");
         } else {
             const task = {
                 id: tarefas.length > 0 ? Math.max(...tarefas.map(t => t.id)) + 1 : 1,
@@ -76,10 +99,10 @@ export default function TarefaPage() {
                 responsavel: responsavelTarefa,
                 concluida: false,
             };
+            window.alert("Tarefa adicionada com sucesso!");
             setTarefas([...tarefas, task]);
             setPaginaAtual(1);
         }
-
         fecharModal();
     };
 
@@ -88,18 +111,22 @@ export default function TarefaPage() {
     };
 
     const excluirTarefa = (id) => {
+    const confirmacao = window.confirm("Tem certeza que deseja excluir esta tarefa?");
+    
+    if (confirmacao) {
         setTarefas(tarefas.filter(t => t.id !== id));
         if (tarefasPaginadas.length === 1 && paginaAtual > 1) {
             setPaginaAtual(paginaAtual - 1);
+            }
         }
     };
 
     return (
-        <div className="flex h-screen bg-gray-200">
+        <div className="flex h-screen bg-gray-300">
             <main className="flex-1 flex flex-col items-center p-8 pt-20 relative">
                 <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
                     <div className="flex justify-between gap-4 mb-8">
-                        <div className="flex-1 flex items-center border border-gray-300 rounded-lg px-3 focus-within:border-blue-700 focus-within:ring-1 focus-within:ring-blue-700 bg-white transition-all">
+                        <div className="flex-1 flex items-center border border-gray-500 rounded-lg px-3 focus-within:border-blue-700 focus-within:ring-1 focus-within:ring-blue-700 bg-white transition-all">
                             <IoSearchOutline className="text-gray-500" />
                             <input
                                 type="text"
@@ -115,7 +142,7 @@ export default function TarefaPage() {
 
                         <button 
                             onClick={abrirModalNovo}
-                            className="bg-blue-700 text-white px-5 py-3 rounded-lg font-bold hover:bg-blue-800 shadow-sm transition-all flex items-center gap-2"
+                            className="bg-[#61a1a1] text-white px-5 py-3 rounded-lg font-bold hover:bg-[#408181] shadow-sm transition-all flex items-center gap-2"
                         >
                             <RiMenuAddFill size={20} />
                             <span>Nova Tarefa</span>
@@ -190,15 +217,76 @@ export default function TarefaPage() {
             </main>
 
             <ModalComponent 
-                isOpen={isModalOpen}
-                onClose={fecharModal}
-                novaTarefa={novaTarefa}
-                setNovaTarefa={setNovaTarefa}
-                responsavelTarefa={responsavelTarefa}
-                setResponsavelTarefa={setResponsavelTarefa}
-                salvarTarefa={salvarTarefa}
-                isEditing={tarefaEditando !== null}
-            />
+                isOpen={isModalOpen} 
+                onClose={fecharModal} 
+                titulo={tarefaEditando !== null ? "Editar Tarefa" : "Nova Tarefa"}
+            >
+                <form onSubmit={(e) => { e.preventDefault(); salvarTarefa(); }}>
+                    <div className="flex flex-col gap-5">
+                        <div>
+                            <label htmlFor="texto" className="block mb-1.5 text-sm font-semibold text-gray-700">Descrição</label>
+                            <input 
+                                type="text" 
+                                id="texto"
+                                placeholder="O que deseja fazer hoje?"
+                                value={novaTarefa}
+                                onChange={(e) => setNovaTarefa(e.target.value)}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-1 focus:ring-blue-700 focus:border-blue-700 block w-full px-3 py-2.5 outline-none transition-all" 
+                                required 
+                                autoFocus
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="responsavel" className="block mb-1.5 text-sm font-semibold text-gray-700">Responsável</label>
+                            <input 
+                                type="text" 
+                                id="responsavel"
+                                placeholder="Nome do responsável"
+                                value={responsavelTarefa}
+                                onChange={(e) => setResponsavelTarefa(e.target.value)}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-1 focus:ring-blue-700 focus:border-blue-700 block w-full px-3 py-2.5 outline-none transition-all" 
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 mt-8 pt-4 border-t border-gray-100">
+                        <button 
+                            type="submit" 
+                            className="flex-1 bg-[#61a1a1] text-white hover:bg-[#4e9191] font-bold rounded-lg text-sm px-5 py-3 transition-colors"
+                        >
+                            {tarefaEditando !== null ? "Salvar Alterações" : "Adicionar Tarefa"}                                
+
+                        </button>
+                        <button 
+                            onClick={fecharModal} 
+                            type="button" 
+                            className="flex-1 text-white bg-red-500 border border-red hover:bg-[#c71f1f] font-bold rounded-lg text-sm px-5 py-3 transition-colors"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </ModalComponent>
         </div>
     );
 }
+
+//função de busca genérica para filtrar por qualquer campo da tarefa, caso queira expandir no futuro
+// const tarefasFiltradas = useMemo(() => {
+//       const termo = busca.toLowerCase()
+//       return dados.filter((row) =>
+//       Object.values(row).some((value) => {
+//         if (typeof value === "string") {
+//           return value.toLowerCase().includes(termo);
+//         }
+//         if (
+//           typeof value === "number" ||
+//           typeof value === "boolean" ||
+//           value instanceof Date
+//         ) {
+//           return (String(value).toLowerCase()).includes(termo);
+//         }
+//         return false;
+//       })
+//     );
+//     }, [dados, busca])
