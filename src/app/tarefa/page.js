@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { IoSearchOutline } from "react-icons/io5";
 import { FcCheckmark } from "react-icons/fc";
 import { MdDelete } from "react-icons/md";
@@ -7,13 +7,20 @@ import { RiMenuAddFill, RiEdit2Fill } from "react-icons/ri";
 import TableComponent from "@/components/TableComponent";
 import ModalComponent from "@/components/ModalComponent";
 import api from "@/utils/axios";
+import { toast } from "react-toastify";
 
 export default function TarefaPage() {
-    
     const [tarefas, setTarefas] = useState([]);
+    const [novaTarefa, setNovaTarefa] = useState("");
+    const [responsavelTarefa, setResponsavelTarefa] = useState("");
+    const [busca, setBusca] = useState("");
+    const [paginaAtual, setPaginaAtual] = useState(1);
+    const [itensPorPagina, setItensPorPagina] = useState(5);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [tarefaEditando, setTarefaEditando] = useState(null);
 
-        useEffect(() => {
-            async function getTarefas() {
+    useEffect(() => {
+        async function getTarefas() {
             try {
                 const resposta = await api.get('/tarefa/get-all');
                 
@@ -25,23 +32,106 @@ export default function TarefaPage() {
                     criadoEm: itemDoBanco.created_at,
                     atualizadoEm: itemDoBanco.updated_at
                 }));
-                console.log("RESPOSTA BRUTA DA API:", resposta.data);
+                console.log("resposta da api:", resposta.data);
 
                 setTarefas(tarefasFormatadas);      
             } catch (error) {
                 console.log(error.message);
             }
         }
-            getTarefas()
-        }, []);
+        getTarefas();
+    }, []);
 
-    const [novaTarefa, setNovaTarefa] = useState("");
-    const [responsavelTarefa, setResponsavelTarefa] = useState("");
-    const [busca, setBusca] = useState("");
-    const [paginaAtual, setPaginaAtual] = useState(1);
-    const [itensPorPagina, setItensPorPagina] = useState(5);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [tarefaEditando, setTarefaEditando] = useState(null);
+    const salvarTarefa = async () => {
+        if (novaTarefa.trim() === "") return;
+
+        if (tarefaEditando !== null) {
+            console.log("Editando a tarefa: ", tarefaEditando);
+
+            try {
+                const pacote = {
+                    tarefa: novaTarefa,
+                    responsavel: responsavelTarefa
+                };
+
+                const resposta = await api.patch(`/tarefa/update/${tarefaEditando}`, pacote);
+
+                const tarefasAtualizadas = tarefas.map(t => {
+                    if (t.id === tarefaEditando) {
+                        return {
+                            ...t,
+                            texto: novaTarefa,
+                            responsavel: responsavelTarefa
+                        };
+                    }
+                    return t;
+                });
+                
+                setTarefas(tarefasAtualizadas);
+                toast.success("Tarefa atualizada com sucesso!");
+            } catch (error) {
+                console.error("Erro ao atualizar tarefa:", error);
+                toast.error("Ops! Ocorreu um erro ao atualizar a tarefa.");
+            }
+        } else {
+            try {
+                const pacote = {
+                    tarefa: novaTarefa,
+                    responsavel: responsavelTarefa
+                };
+                
+                const resposta = await api.post('/tarefa/create', pacote);
+                
+                const novaTarefaCriada = {
+                    id: resposta.data.id, 
+                    texto: resposta.data.tarefa, 
+                    responsavel: resposta.data.responsavel,
+                };
+                
+                setTarefas([...tarefas, novaTarefaCriada]);
+                setPaginaAtual(1);
+                toast.success("Tarefa criada com sucesso!");
+
+            } catch (error) {
+                console.error("Erro ao criar tarefa:", error);
+                toast.error("Ops! Ocorreu um erro ao salvar no banco de dados.");
+            }
+        }
+        fecharModal();
+    };
+
+    const alternarConclusao = (id) => {
+        const tarefasAtualizadas = tarefas.map(t => {
+            if (t.id === id) {
+                const pacote = { concluida: !t.concluida };
+                return { ...t, concluida: !t.concluida };
+            }
+            return t;
+        });
+        setTarefas(tarefasAtualizadas);
+    };
+
+    const excluirTarefa = async (id) => {
+        if (!window.confirm("Tem certeza que deseja excluir esta tarefa?")) return;
+
+        try {
+            await api.delete(`/tarefa/deletar/${id}`);
+            const tarefasAtualizadas = tarefas.filter(t => t.id !== id);
+            setTarefas(tarefasAtualizadas);
+
+            if (tarefasPaginadas.length === 1 && paginaAtual > 1) {
+                setPaginaAtual(paginaAtual - 1);
+            }
+            toast.success("Tarefa excluída com sucesso!");
+
+        } catch (error) {
+            console.error("Erro ao excluir tarefa:", error);
+            toast.error("Ops! Ocorreu um erro ao excluir a tarefa.");
+            if (error.response) {
+                console.log("Detalhes do erro no servidor:", error.response.data);
+            }
+        }
+    };
 
     const mostrarId = true;
     const mostrarTarefa = true;
@@ -65,61 +155,19 @@ export default function TarefaPage() {
         setTarefaEditando(null);
         setNovaTarefa("");
         setResponsavelTarefa("");
-        setIsModalOpen(true);
-    };
+        setIsModalOpen(true); };
 
     const abrirModalEdicao = (tarefa) => {
         setTarefaEditando(tarefa.id);
         setNovaTarefa(tarefa.texto);
         setResponsavelTarefa(tarefa.responsavel || "");
-        setIsModalOpen(true);
-    };
+        setIsModalOpen(true); };
 
     const fecharModal = () => {
         setIsModalOpen(false);
         setTarefaEditando(null);
         setNovaTarefa("");
-        setResponsavelTarefa("");
-    };
-
-    const salvarTarefa = () => {
-        if (novaTarefa.trim() === "") return;
-
-        if (tarefaEditando !== null) {
-            setTarefas(tarefas.map(t => 
-                t.id === tarefaEditando 
-                    ? { ...t, texto: novaTarefa, responsavel: responsavelTarefa } 
-                    : t
-                ));
-            window.alert("Tarefa atualizada com sucesso!");
-        } else {
-            const task = {
-                id: tarefas.length > 0 ? Math.max(...tarefas.map(t => t.id)) + 1 : 1,
-                texto: novaTarefa,
-                responsavel: responsavelTarefa,
-                concluida: false,
-            };
-            window.alert("Tarefa adicionada com sucesso!");
-            setTarefas([...tarefas, task]);
-            setPaginaAtual(1);
-        }
-        fecharModal();
-    };
-
-    const alternarConclusao = (id) => {
-        setTarefas(tarefas.map(t => t.id === id ? { ...t, concluida: !t.concluida } : t));
-    };
-
-    const excluirTarefa = (id) => {
-    const confirmacao = window.confirm("Tem certeza que deseja excluir esta tarefa?");
-    
-    if (confirmacao) {
-        setTarefas(tarefas.filter(t => t.id !== id));
-        if (tarefasPaginadas.length === 1 && paginaAtual > 1) {
-            setPaginaAtual(paginaAtual - 1);
-            }
-        }
-    };
+        setResponsavelTarefa(""); };
 
     return (
         <div className="flex h-screen bg-gray-300">
@@ -255,7 +303,6 @@ export default function TarefaPage() {
                             className="flex-1 bg-[#61a1a1] text-white hover:bg-[#4e9191] font-bold rounded-lg text-sm px-5 py-3 transition-colors"
                         >
                             {tarefaEditando !== null ? "Salvar Alterações" : "Adicionar Tarefa"}                                
-
                         </button>
                         <button 
                             onClick={fecharModal} 
@@ -270,23 +317,3 @@ export default function TarefaPage() {
         </div>
     );
 }
-
-//função de busca genérica para filtrar por qualquer campo da tarefa, caso queira expandir no futuro
-// const tarefasFiltradas = useMemo(() => {
-//       const termo = busca.toLowerCase()
-//       return dados.filter((row) =>
-//       Object.values(row).some((value) => {
-//         if (typeof value === "string") {
-//           return value.toLowerCase().includes(termo);
-//         }
-//         if (
-//           typeof value === "number" ||
-//           typeof value === "boolean" ||
-//           value instanceof Date
-//         ) {
-//           return (String(value).toLowerCase()).includes(termo);
-//         }
-//         return false;
-//       })
-//     );
-//     }, [dados, busca])
