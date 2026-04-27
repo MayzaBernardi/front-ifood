@@ -1,45 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap');
 @import "tailwindcss";
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #3e3e3e; /* Cinza escuro padrão do iFood para texto */
 }
 
-
-  @theme {
-  
-  --color-unochapeco: #1124f5;
+@theme {
   --color-ifood: #ea1d2c;
+  --color-ifood-hover: #cc1a27; /* Tom mais escuro para hover no botão vermelho */
+  --color-ifood-light: #f9eaed; /* Rosa claro para fundos e destaques suaves */
 
-  --bg-verde-escuro: #408C3E;
-  --bg-verde-claro: #0a0a0a;
+  /* Status e Tags (para cupons/status de aberto) */
+  --bg-verde-escuro: #3ebd59; 
+  --bg-verde-claro: #e8f5e9;
 
-  --color-btn-delete: #C40703;
-  --color-btn-edit: #f55310;
-  --color-btn-save: #3440C2;
+  /* Botões Semânticos */
+  --color-btn-save: #ea1d2c;  /* Ação principal sempre leva a cor da marca */
+  --color-btn-edit: #717171;  /* Ação secundária em cinza médio */
+  --color-btn-delete: #a6a6a6; /* Ação cancelar em cinza mais claro */
+  --color-btn-hover: #e0e0e0; /* Hover neutro para ações secundárias */
 
-  --color-fundo: #f3f4f6;
-  --color-texto-principal: #1f2937;
+  /* Estrutura */
+  --color-fundo: #f7f7f7; /* Fundo cinza bem claro usado no app */
+  --color-texto-principal: #3e3e3e; /* Preto suave */
+  --color-texto-secundario: #cccccf; /* Cinza para textos de apoio */
+  --color-facebook: #3b5998; /* Azul do Facebook para botões de login social */
+
+  --color-border: #e0e0e0; /* Bordas claras para separar seções */
 }
-
-
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #121212;
+    --foreground: #f5f5f5;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
