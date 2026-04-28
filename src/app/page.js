@@ -9,7 +9,7 @@ export default function iFoodLogin() {
       <header className="absolute top-0 left-0 w-full p-5 flex items-center justify-between z-10">
         <div className="relative w-24 h-8">
           <Image
-            src="/pedeAi.png"
+            src="/panela.png"
             alt="Logo do iFood"
             layout="fill"
             objectFit="contain"
@@ -22,11 +22,11 @@ export default function iFoodLogin() {
         <div className="flex-1 bg-ifood-light flex flex-col justify-center items-center p-10 md:p-20 relative">
           <div className="relative w-full max-w-xl aspect-[1.3/1] mt-16 md:mt-0">
             <Image
-              src="/loginLogo.png"
+              src="/FavFood.png"
               alt="Imagem de login do iFood"
               layout="fill"
               objectFit="contain"
-              className="rounded-2xl"
+              className="rounded-3xl"
             />
           </div>
 
@@ -66,13 +66,18 @@ export default function iFoodLogin() {
 
               <div className="flex w-full gap-3 mt-4">
                 <Link
-                  href="/login"
+                  href="/criarConta"
                   className="flex h-14 flex-1 items-center justify-center rounded-xl border border-border bg-white hover:bg-ifood text-texto-secundario font-semibold transition-colors"
                 >
                   Criar conta
                 </Link>
                 <button className="flex h-14 flex-1 items-center justify-center rounded-xl border border-border bg-white hover:bg-ifood text-texto-secundario font-semibold transition-colors">
+                  <Link 
+                  href="/login" 
+                  className="w-full h-full flex items-center justify-center"
+                  >
                   Entrar
+                  </Link>
                 </button>
               </div>
             </div>
