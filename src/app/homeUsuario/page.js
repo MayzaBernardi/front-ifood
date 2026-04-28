@@ -4,19 +4,20 @@ import Link from "next/link";
 import { FiSearch, FiChevronDown, FiUser, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { HiOutlineShoppingBag } from "react-icons/hi2";
 import { FaLocationDot } from "react-icons/fa6";
+import Header from "@/components/Header";
 
 
 export default function Home() {
     const categorias = [
-        { id: 1, nome: "Brasileira", img: "/cat-brasileira.png" },
-        { id: 2, nome: "Marmita", img: "/cat-marmita.png" },
-        { id: 3, nome: "Lanches", img: "/cat-lanches.png" },
-        { id: 4, nome: "Promoções", img: "/cat-promocoes.png" },
-        { id: 5, nome: "Doces & Bolos", img: "/cat-doces.png" },
-        { id: 6, nome: "Açaí", img: "/cat-acai.png" },
-        { id: 7, nome: "Saudável", img: "/cat-saudavel.png" },
-        { id: 8, nome: "Japonesa", img: "/cat-japonesa.png" },
-        { id: 9, nome: "Italiana", img: "/cat-italiana.png" },
+        { id: 1, nome: "Brasileira", img: "/comidaBrasileira.png" },
+        { id: 2, nome: "Marmita", img: "/marmita.png" },
+        { id: 3, nome: "Hambúrguer", img: "/hamburguer.png" },
+        { id: 4, nome: "Frutos do Mar", img: "/frutosDoMar.png" },
+        { id: 5, nome: "Doces & Bolos", img: "/bolosEdoces.png" },
+        { id: 6, nome: "Sorvetes", img: "/sorvete.png" },
+        { id: 7, nome: "Saudável", img: "/saudavel.png" },
+        { id: 8, nome: "Japonesa", img: "/sushi.png" },
+        { id: 9, nome: "Francesa", img: "/italiano.png" },
     ];
 
     const pratos = [
@@ -35,58 +36,13 @@ export default function Home() {
         { id: 2, alt: "colocar outra promoção", bg: "bg-red-500" }
     ];
 
+    // const encherCarrinho = () => {
+        
+    // };
+
     return (
         <div className="min-h-screen bg-white font-sans text-gray-800">
-            <header className="flex items-center justify-between px-8 py-4 bg-white border-b border-gray-100 sticky top-0 z-50">
-                <div className="flex items-center gap-8">
-                    <div className="relative w-24 h-10">
-                        <Image
-                            src="/FavFood.png"
-                            alt="Logo FavFood"
-                            fill
-                            className="object-contain"
-                        />
-                    </div>
-                    
-                    <nav className="hidden md:flex">
-                        <Link href="/" className="text-[#ea1d2c] font-semibold text-sm hover:underline">
-                            Restaurantes
-                        </Link>
-                    </nav>
-                </div>
-
-                <div className="flex-1 max-w-2xl mx-8">
-                    <div className="flex items-center bg-gray-100 rounded-lg px-4 py-3 gap-3 focus-within:ring-1 focus-within:ring-[#ea1d2c] transition-shadow">
-                        <FiSearch className="text-gray-500" size={20} />
-                        <input 
-                            type="text" 
-                            placeholder="Busque por item ou loja" 
-                            className="bg-transparent border-none outline-none w-full text-sm text-gray-700 placeholder-gray-500"
-                        />
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-6">
-                    <div className="hidden lg:flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors">
-                        <FaLocationDot className="text-[#ea1d2c]" size={20} />
-                    </div>
-
-                    <button className="flex items-center justify-center p-2 text-[#ea1d2c] hover:bg-red-50 rounded-full transition-colors">
-                        <FiUser size={24} />
-                    </button>
-
-                    <button className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                        <div className="relative">
-                            <HiOutlineShoppingBag className="text-[#ea1d2c]" size={28} />
-                        </div>
-                        <div className="flex flex-col items-start hidden sm:flex">
-                            <span className="text-sm font-semibold">R$ 0,00</span>
-                            <span className="text-xs text-gray-500">0 itens</span>
-                        </div>
-                    </button>
-                </div>
-            </header>
-
+            <Header />
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <section className="mb-12">
                     <h1 className="text-2xl font-bold text-gray-800 mb-6">
@@ -100,10 +56,15 @@ export default function Home() {
 
                         <div className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide py-4 px-2 snap-x snap-mandatory">
                             {categorias.map((categoria) => (
-                                <Link href={`/categoria/${categoria.nome.toLowerCase()}`} key={categoria.id} className="flex flex-col items-center gap-3 min-w-[100px] sm:min-w-[120px] snap-start group/item">
-                                    <div className="w-24 h-20 sm:w-28 sm:h-24 bg-gray-50 rounded-2xl flex items-center justify-center p-2 group-hover/item:shadow-md transition-shadow relative overflow-hidden">
-                                        <div className="w-full h-full bg-gray-200 rounded-xl flex items-center justify-center text-xs text-gray-400">
-                                            IMG
+                                <Link href={`/categoria/${categoria.nome.toLowerCase()}`} key={categoria.id} className="flex flex-col items-center gap-3 min-w-25 sm:min-w-30 snap-start group/item">
+                                    <div className="w-24 h-20 sm:w-28 sm:h-24 bg-white rounded-2xl flex items-center justify-center p-2 group-hover/item:shadow-md transition-shadow relative overflow-hidden">
+                                        <div className="w-full h-full bg-white rounded-xl flex items-center justify-center text-xs text-gray-400">
+                                            <Image
+                                                src={categoria.img}
+                                                alt={categoria.nome}
+                                                fill
+                                                className="object-contain"
+                                            />
                                         </div>
                                     </div>
                                     <span className="text-sm font-medium text-gray-600 group-hover/item:text-gray-900 transition-colors text-center">
@@ -122,7 +83,7 @@ export default function Home() {
                 <section className="mb-12">
                     <div className="flex gap-4 overflow-x-auto scrollbar-hide py-2 snap-x snap-mandatory">
                         {banners.map((banner) => (
-                            <div key={banner.id} className={`min-w-[300px] md:min-w-[420px] h-48 md:h-56 ${banner.bg} rounded-3xl snap-start relative overflow-hidden flex items-center justify-center text-white font-bold text-xl cursor-pointer hover:opacity-95 transition-opacity`}>
+                            <div key={banner.id} className={`min-w-75 md:min-w-105 h-48 md:h-56 ${banner.bg} rounded-3xl snap-start relative overflow-hidden flex items-center justify-center text-white font-bold text-xl cursor-pointer hover:opacity-95 transition-opacity`}>
                                 <span> {banner.alt}</span>
                             </div>
                         ))}
