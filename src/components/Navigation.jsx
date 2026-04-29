@@ -48,14 +48,14 @@ export default function Navigation() {
                             <RiHome4Line size={20} /> Home
                         </Link>
                         <Link 
-                            href="/tarefas" 
+                            href="/gestorDePedidos" 
                             className="flex items-center gap-3 p-3 rounded-lg text-gray-700 font-medium hover:bg-red-50 hover:text-ifood transition-colors" 
                             onClick={() => setSidebarOpen(false)}
                         >
                             <LiaClipboardListSolid size={20} /> Gestor de Pedidos
                         </Link>
                         <Link 
-                            href="/criarCardapio" 
+                            href="/visualizarMenu" 
                             className="flex items-center gap-3 p-3 rounded-lg text-gray-700 font-medium hover:bg-red-50 hover:text-ifood transition-colors" 
                             onClick={() => setSidebarOpen(false)}
                         >
@@ -111,7 +111,7 @@ export default function Navigation() {
                         <FiUser size={24} />
                     </button>
 
-                    <Link href="/criarCardapio" className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
+                    <Link href="/visualizarMenu" className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
                         <BiSolidFoodMenu className="text-ifood" size={24} />
                     </Link>
                 </div>

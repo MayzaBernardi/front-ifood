@@ -1,4 +1,5 @@
 'use client';
+import { useRef } from "react"; 
 import Image from "next/image";
 import Link from "next/link";
 import { FiSearch, FiChevronDown, FiUser, FiChevronLeft, FiChevronRight } from "react-icons/fi";
@@ -6,8 +7,9 @@ import { HiOutlineShoppingBag } from "react-icons/hi2";
 import { FaLocationDot } from "react-icons/fa6";
 import Header from "@/components/Header";
 
-
 export default function Home() {
+    const carrosselRef = useRef(null);
+
     const categorias = [
         { id: 1, nome: "Brasileira", img: "/comidaBrasileira.png" },
         { id: 2, nome: "Marmita", img: "/marmita.png" },
@@ -32,13 +34,21 @@ export default function Home() {
     ];
 
     const banners = [
-        { id: 1, alt: "colocar alguma promoção", bg: "bg-red-600" },
-        { id: 2, alt: "colocar outra promoção", bg: "bg-red-500" }
+        { id: 1, img: "/banner1.png", bg: "bg-gradient-to-r from-[#ea1d2c] to-[#ff5f5f]" },
+        { id: 2, img: "/banner2.png", bg: "bg-gradient-to-r from-[#ff5f5f] to-[#ea1d2c]" }
     ];
 
-    // const encherCarrinho = () => {
-        
-    // };
+    const scrollLeft = () => {
+        if (carrosselRef.current) {
+            carrosselRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+        }
+    };
+
+    const scrollRight = () => {
+        if (carrosselRef.current) {
+            carrosselRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+        }
+    };
 
     return (
         <div className="min-h-screen bg-white font-sans text-gray-800">
@@ -50,15 +60,21 @@ export default function Home() {
                     </h1>
                     
                     <div className="relative group">
-                        <button className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 bg-white shadow-md rounded-full p-2 text-gray-400 hover:text-[#ea1d2c] transition-colors hidden md:block">
+                        <button 
+                            onClick={scrollLeft} 
+                            className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 bg-white shadow-md rounded-full p-2 text-gray-400 hover:text-[#ea1d2c] transition-colors hidden md:block"
+                        >
                             <FiChevronLeft size={24} />
                         </button>
 
-                        <div className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide py-4 px-2 snap-x snap-mandatory">
+                        <div 
+                            ref={carrosselRef} 
+                            className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide py-4 px-2 snap-x snap-mandatory"
+                        >
                             {categorias.map((categoria) => (
                                 <Link href={`/categoria/${categoria.nome.toLowerCase()}`} key={categoria.id} className="flex flex-col items-center gap-3 min-w-25 sm:min-w-30 snap-start group/item">
                                     <div className="w-24 h-20 sm:w-28 sm:h-24 bg-white rounded-2xl flex items-center justify-center p-2 group-hover/item:shadow-md transition-shadow relative overflow-hidden">
-                                        <div className="w-full h-full bg-white rounded-xl flex items-center justify-center text-xs text-gray-400">
+                                        <div className="w-full h-full bg-white rounded-xl flex items-center justify-center text-xs text-btn-delete">
                                             <Image
                                                 src={categoria.img}
                                                 alt={categoria.nome}
@@ -67,14 +83,17 @@ export default function Home() {
                                             />
                                         </div>
                                     </div>
-                                    <span className="text-sm font-medium text-gray-600 group-hover/item:text-gray-900 transition-colors text-center">
+                                    <span className="text-sm font-medium text-btn-edit group-hover/item:text-gray-900 transition-colors text-center">
                                         {categoria.nome}
                                     </span>
                                 </Link>
                             ))}
                         </div>
 
-                        <button className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10 bg-white shadow-md rounded-full p-2 text-gray-400 hover:text-[#ea1d2c] transition-colors hidden md:block">
+                        <button 
+                            onClick={scrollRight} 
+                            className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10 bg-white shadow-md rounded-full p-2 text-btn-delete hover:text-ifood transition-colors hidden md:block"
+                        >
                             <FiChevronRight size={24} />
                         </button>
                     </div>
@@ -84,7 +103,14 @@ export default function Home() {
                     <div className="flex gap-4 overflow-x-auto scrollbar-hide py-2 snap-x snap-mandatory">
                         {banners.map((banner) => (
                             <div key={banner.id} className={`min-w-75 md:min-w-105 h-48 md:h-56 ${banner.bg} rounded-3xl snap-start relative overflow-hidden flex items-center justify-center text-white font-bold text-xl cursor-pointer hover:opacity-95 transition-opacity`}>
-                                <span> {banner.alt}</span>
+                                
+                                <Image
+                                    src={banner.img}
+                                    alt={`Promoção ${banner.id}`}
+                                    fill
+                                    className="object-cover" 
+                                />
+                                
                             </div>
                         ))}
                     </div>
@@ -96,14 +122,20 @@ export default function Home() {
                             <h2 className="text-xl font-bold text-gray-800">Desconto até 35% OFF</h2>
                             <p className="text-sm text-gray-500 mt-1">Pratos incríveis com até 35% de desconto</p>
                         </div>
-                        <Link href="/descontos" className="text-[#ea1d2c] font-semibold text-sm hover:underline">
+                        <Link href="/descontos" className="text-ifood font-semibold text-sm hover:underline">
                             Ver mais
                         </Link>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {pratos.map((item) => (
-                            <div key={item.id} className="h-40 border border-gray-100 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
-                                Restaurante Placeholder
+                            <div key={item.id} className="h-40 border border-border rounded-xl bg-gray-50 flex items-center justify-center text-btn-edit">
+                                <Image
+                                    src={item.img}
+                                    alt={item.nome}
+                                    width={100}
+                                    height={100}
+                                    className="object-contain"
+                                />
                             </div>
                         ))}
                     </div>

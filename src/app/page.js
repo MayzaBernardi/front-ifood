@@ -5,23 +5,37 @@ import Link from "next/link";
 import { FaFacebookSquare } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import ModalComponent from "@/components/ModalComponent";
+import NavigateHome from "@/components/NavigationHome";
 
 export default function IFoodLogin() {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    const [etapaRecuperacao, setEtapaRecuperacao] = useState(1);
+    const [emailRecuperacao, setEmailRecuperacao] = useState("");
+    const [codigoValidacao, setCodigoValidacao] = useState("");
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEtapaRecuperacao(1); 
+        setEmailRecuperacao("");
+        setCodigoValidacao("");
+    };
+
+    const handleEnviarEmail = async (e) => {
+        e.preventDefault();
+        
+        setEtapaRecuperacao(2); 
+    };
+
+    const handleValidarCodigo = async (e) => {
+        e.preventDefault();
+        
+        console.log("Validando código:", codigoValidacao);
+    };
 
     return (
         <div className="flex min-h-screen flex-col font-sans text-texto-principal bg-fundo">
-            <header className="absolute top-0 left-0 w-full p-5 flex items-center justify-between z-10">
-                <div className="relative w-28 h-10">
-                    <Image
-                        src="/panela.png"
-                        alt="Logo do iFood"
-                        fill
-                        className="rounded-2xl object-contain"
-                    />
-                </div>
-            </header>
-
+            <NavigateHome />
             <main className="flex w-full flex-1 flex-col md:flex-row relative">
                 <div className="flex-1 bg-ifood-light flex flex-col justify-center items-center p-10 md:p-20 relative">
                     <div className="relative w-full max-w-2xl aspect-[1.3/1] mt-16 md:mt-0 transform scale-110">
@@ -37,7 +51,7 @@ export default function IFoodLogin() {
                         href="https://github.com/MayzaBernardi/front-ifood.git"
                         target="_blank"
                         rel="noreferrer"
-                        className="absolute bottom-5 left-5 text-xs text-gray-400 hover:text-[#ea1d2c] hover:underline"
+                        className="absolute bottom-5 left-5 text-xs text-gray-400 hover:text-ifood hover:underline"
                     >
                         https://github.com/MayzaBernardi/front-ifood.git
                     </a>
@@ -82,16 +96,16 @@ export default function IFoodLogin() {
                             <div className="flex flex-col items-center gap-3 mt-2">
                                 <button 
                                     type="submit" 
-                                    className="flex h-12 w-2/3 items-center justify-center rounded-xl border-none bg-[#d41a25] hover:bg-[#d41a30] text-white font-extrabold text-lg transition-colors shadow-md"
+                                    className="flex h-12 w-2/3 items-center justify-center rounded-xl border-none bg-ifood hover:bg-ifood-hover text-white font-extrabold text-lg transition-colors shadow-md"
                                 >
                                     Efetuar Login
                                 </button>
 
-                                <div className="text-sm text-bg-[#ea1d2c] mt-2">
+                                <div className="text-sm text-black mt-2">
                                     Ainda não tem conta?{' '}
                                     <Link 
                                         href="/criarConta" 
-                                        className="font-bold text-bg-[#ea1d2c] hover:underline"
+                                        className="font-bold text-black hover:underline"
                                     >
                                         Registre-se
                                     </Link>
@@ -126,28 +140,65 @@ export default function IFoodLogin() {
 
             <ModalComponent 
                 isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
+                onClose={handleCloseModal} 
                 titulo="Recuperar Senha"
             >
-                <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
-                    <p className="text-sm text-texto-principal">
-                        Informe seu e-mail cadastrado e o código de verificação recebido para redefinir sua senha.
-                    </p>
-                    
-                    <input 
-                        type="email" 
-                        placeholder="E-mail cadastrado" 
-                        required
-                        className="w-full p-3 rounded-lg border border-border focus:outline-none focus:border-color-ifood focus:ring-1 focus:ring-color-ifood transition-colors"
-                    />
-                    <button 
-                        type="submit" 
-                        className="mt-2 w-full p-3 rounded-lg bg-[#ea1d2c] text-white font-bold hover:bg-[#d41a25] transition-colors"
-                    >
-                        Confirmar email
-                    </button>
+                {etapaRecuperacao === 1 && (
+                    <form className="flex flex-col gap-4" onSubmit={handleEnviarEmail}>
+                        <p className="text-sm text-texto-principal">
+                            Informe seu e-mail cadastrado para receber o código de verificação.
+                        </p>
+                        
+                        <input 
+                            type="email" 
+                            placeholder="E-mail cadastrado" 
+                            required
+                            value={emailRecuperacao}
+                            onChange={(e) => setEmailRecuperacao(e.target.value)}
+                            className="w-full p-3 rounded-lg border border-border focus:outline-none focus:border-ifood focus:ring-1 focus:ring-ifood transition-colors"
+                        />
+                        <button 
+                            type="submit" 
+                            className="mt-2 w-full p-3 rounded-lg bg-ifood text-white font-bold hover:bg-ifood-hover transition-colors"
+                        >
+                            Enviar código
+                        </button>
+                    </form>
+                )}
 
-                </form>
+                {etapaRecuperacao === 2 && (
+                    <form className="flex flex-col gap-4" onSubmit={handleValidarCodigo}>
+                        <p className="text-sm text-texto-principal">
+                            Enviamos um código para o e-mail <strong>{emailRecuperacao}</strong>. Insira-o abaixo:
+                        </p>
+                        
+                        <input 
+                            type="text" 
+                            placeholder="Código de 6 dígitos" 
+                            required
+                            maxLength={6}
+                            value={codigoValidacao}
+                            onChange={(e) => setCodigoValidacao(e.target.value)}
+                            className="w-full p-3 rounded-lg border border-border focus:outline-none focus:border-[#ea1d2c] focus:ring-1 focus:ring-[#ea1d2c] transition-colors text-center text-lg tracking-widest"
+                        />
+                        
+                        <div className="flex flex-col gap-2 mt-2">
+                            <button 
+                                type="submit" 
+                                className="w-full p-3 rounded-lg bg-ifood text-white font-bold hover:bg-ifood-hover transition-colors"
+                            >
+                                Confirmar código
+                            </button>
+                            <button 
+                                type="button" 
+                                onClick={() => setEtapaRecuperacao(1)}
+                                className="w-full p-3 rounded-lg border border-gray-300 text-gray-700 font-bold hover:bg-gray-50 transition-colors"
+                            >
+                                Voltar
+                            </button>
+                        </div>
+                    </form>
+                )}
             </ModalComponent>
         </div>
     );
