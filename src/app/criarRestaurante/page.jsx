@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import api from "@/utils/axios";
 import { toast } from "react-toastify";
+import NavigateHome from "@/components/NavigationHome";
 
 export default function CadastrarRestaurante() {
     const router = useRouter();
@@ -13,7 +14,8 @@ export default function CadastrarRestaurante() {
         cnpj: "",
         horario_atendimento: "",
         tempo_entrega: "",
-        id_cupons: ""
+        email: "",
+        senha: ""
     });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -43,7 +45,8 @@ export default function CadastrarRestaurante() {
                 cnpj: "",
                 horario_atendimento: "",
                 tempo_entrega: "",
-                id_cupons: ""
+                email: "",
+                senha: ""
             });
 
             router.push("/"); 
@@ -59,7 +62,7 @@ export default function CadastrarRestaurante() {
 
     return (
         <div className="flex min-h-screen flex-col md:flex-row font-sans text-texto-principal bg-white">
-        
+            <NavigateHome />
             <div className="hidden md:flex flex-1 bg-ifood-light flex-col justify-center items-center p-10 relative">
                 <div className="relative w-full max-w-lg aspect-[1.3/1]">
                     <Image
@@ -172,7 +175,7 @@ export default function CadastrarRestaurante() {
                                 Senha de acesso
                             </label>
                             <input 
-                                type="text" 
+                                type="password" 
                                 id="senha"
                                 name="senha"
                                 placeholder="Crie uma senha segura para o restaurante acessar o sistema"

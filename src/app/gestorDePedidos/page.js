@@ -11,19 +11,19 @@ export default function GerenciadorPedidos() {
     const [paginaAtual, setPaginaAtual] = useState(1);
     const [itensPorPagina, setItensPorPagina] = useState(5);
 
-    useEffect(() => {
-        const fetchPedidos = async () => {
-            try {
-                const idRestaurante = localStorage.getItem('id_restaurante') || '1';
-                const resposta = await api.get(`/pedidos/restaurantes/${idRestaurante}`); 
-                setPedidos(resposta.data);
-            } catch (error) {
-                console.error("Erro ao buscar pedidos:", error);
-            }
-        };
+    // useEffect(() => {
+    //     const fetchPedidos = async () => {
+    //         try {
+    //             const idRestaurante = localStorage.getItem('id_restaurante') || '1';
+    //             const resposta = await api.get(`/pedidos/restaurantes/${idRestaurante}`); 
+    //             setPedidos(resposta.data);
+    //         } catch (error) {
+    //             console.error("Erro ao buscar pedidos:", error);
+    //         }
+    //     };
 
-        fetchPedidos();
-    }, []);
+    //     fetchPedidos();
+    // }, []);
 
     const indexOfLastItem = paginaAtual * itensPorPagina;
     const indexOfFirstItem = indexOfLastItem - itensPorPagina;

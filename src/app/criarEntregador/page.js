@@ -18,6 +18,7 @@ export default function CadastroCliente() {
     });
 
     const [isLoading, setIsLoading] = useState(false);
+    const [isEntregador, setIsEntregador] = useState(false);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -35,9 +36,14 @@ export default function CadastroCliente() {
         setIsLoading(true);
 
         try {
-            const resposta = await api.post('/pessoas/register', formData);
+            const respostaPessoa = await api.post('/pessoas/register', formData);
             
-            toast.success("Conta criada com sucesso!");
+            if (isEntregador) {
+                const idPessoa = respostaPessoa.data.data.id; 
+                await api.post('/entregadores/create', { id_pessoa: idPessoa });
+            }
+            
+            toast.success(isEntregador ? "Conta de entregador criada com sucesso!" : "Conta criada com sucesso!");
             
             setFormData({
                 nome: "",
@@ -46,6 +52,7 @@ export default function CadastroCliente() {
                 senha: "",
                 email: ""
             });
+            setIsEntregador(false);
             
             router.push("/"); 
 
@@ -61,14 +68,15 @@ export default function CadastroCliente() {
     return (
         <div className="flex min-h-screen flex-col md:flex-row font-sans text-texto-principal bg-white">
             <NavigateHome />
-                <div className="hidden md:flex flex-1 bg-ifood-light flex-col justify-center items-center p-10 relative">
-                    <div className="relative w-full max-w-lg aspect-[1.3/1]">
-                        <Image
-                            src="/FavFood.png" 
-                            alt="Pessoas pedindo comida"
-                            fill
-                            className="object-contain"
-                        />
+            
+            <div className="hidden md:flex flex-1 bg-ifood-light flex-col justify-center items-center p-10 relative">
+                <div className="relative w-full max-w-lg aspect-[1.3/1]">
+                    <Image
+                        src="/FavFood.png" 
+                        alt="Pessoas pedindo comida"
+                        fill
+                        className="object-contain"
+                    />
                 </div>
             </div>
 
@@ -154,6 +162,19 @@ export default function CadastroCliente() {
                                 className="bg-fundo border border-border text-texto-principal text-sm rounded-xl focus:ring-1 focus:ring-[#ea1d2c] focus:border-[#ea1d2c] block w-full px-4 py-3.5 outline-none transition-all" 
                                 required 
                             />
+                        </div>
+
+                        <div className="flex items-center gap-2 mt-2">
+                            <input 
+                                type="checkbox" 
+                                id="isEntregador" 
+                                checked={isEntregador}
+                                onChange={(e) => setIsEntregador(e.target.checked)}
+                                className="w-4 h-4 text-[#ea1d2c] bg-gray-100 border-gray-300 rounded focus:ring-[#ea1d2c]"
+                            />
+                            <label htmlFor="isEntregador" className="text-sm font-medium text-texto-principal cursor-pointer">
+                                Quero me cadastrar como entregador parceiro
+                            </label>
                         </div>
 
                         <button 

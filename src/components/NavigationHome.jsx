@@ -55,14 +55,6 @@ export default function NavigateHome() {
                         >
                             <RiHome4Line size={20} /> Início
                         </Link>
-                        
-                        <Link 
-                            href="/pedir" 
-                            className="flex items-center gap-3 p-3 rounded-lg text-gray-700 font-medium hover:bg-ifood-light hover:text-ifood transition-colors" 
-                            onClick={() => setSidebarOpen(false)}
-                        >
-                            <HiOutlineShoppingBag size={20} /> Pedir Delivery
-                        </Link>
 
                         <Link 
                             href="/criarRestaurante" 
@@ -73,7 +65,7 @@ export default function NavigateHome() {
                         </Link>
 
                         <Link 
-                            href="/criarRestaurante" 
+                            href="/criarEntregador" 
                             className="flex items-center gap-3 p-3 rounded-lg text-gray-700 font-medium hover:bg-ifood-light hover:text-ifood transition-colors" 
                             onClick={() => setSidebarOpen(false)}
                         >
@@ -81,7 +73,7 @@ export default function NavigateHome() {
                         </Link>
 
                         <Link 
-                            href="/sobre" 
+                            href="/sobreEmpresa" 
                             className="flex items-center gap-3 p-3 rounded-lg text-gray-700 font-medium hover:bg-ifood-light hover:text-ifood transition-colors" 
                             onClick={() => setSidebarOpen(false)}
                         >

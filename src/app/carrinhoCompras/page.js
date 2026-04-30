@@ -12,7 +12,6 @@ import Header from "@/components/Header";
 export default function CarrinhoCompras() {
     
     useEffect(() => {
-        // Simula o preenchimento do carrinho com itens
         const carrinho = [
             { id: 1, nome: "Prato 1", preco: 29.90, img: "/prato1.png" },
             { id: 2, nome: "Prato 2", preco: 39.90, img: "/prato2.png" },
