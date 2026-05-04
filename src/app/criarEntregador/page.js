@@ -173,7 +173,7 @@ export default function CadastroCliente() {
                                 className="w-4 h-4 text-[#ea1d2c] bg-gray-100 border-gray-300 rounded focus:ring-[#ea1d2c]"
                             />
                             <label htmlFor="isEntregador" className="text-sm font-medium text-texto-principal cursor-pointer">
-                                Quero me cadastrar como entregador parceiro
+                                Aceito os termos e quero me cadastrar como entregador parceiro
                             </label>
                         </div>
 

@@ -2,17 +2,54 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; 
+import axios from "axios"; 
+
 import { FaFacebookSquare } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import ModalComponent from "@/components/ModalComponent";
 import NavigateHome from "@/components/NavigationHome";
 
 export default function IFoodLogin() {
+    const router = useRouter(); 
+
+    const [email, setEmail] = useState("");
+    const [senha, setSenha] = useState("");
+    const [carregando, setCarregando] = useState(false);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
     const [etapaRecuperacao, setEtapaRecuperacao] = useState(1);
     const [emailRecuperacao, setEmailRecuperacao] = useState("");
     const [codigoValidacao, setCodigoValidacao] = useState("");
+
+    const handleLogin = async (e) => {
+        e.preventDefault(); 
+        setCarregando(true);
+
+        try {
+            
+            const response = await axios.post('http://localhost:3333/pessoas/login', { 
+                email, 
+                senha 
+            });
+
+            const resultado = response.data;
+            
+            localStorage.setItem('@App:token', resultado.data.token);
+            localStorage.setItem('@App:user', JSON.stringify(resultado.data));
+
+            router.push('/homeUsuario'); 
+
+        } catch (error) {
+            if (error.response) {
+                alert(`Erro: ${error.response.data.message}`);
+            } else {
+                alert("Ops! Não foi possível conectar ao servidor.");
+            }
+        } finally {
+            setCarregando(false);
+        }
+    };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
@@ -24,12 +61,26 @@ export default function IFoodLogin() {
     const handleEnviarEmail = async (e) => {
         e.preventDefault();
         
-        setEtapaRecuperacao(2); 
+        try {
+            
+            await axios.post('http://localhost:3333/pessoas/esqueci-senha', { 
+                email: emailRecuperacao 
+            });
+
+            setEtapaRecuperacao(2); 
+            
+            alert("Se o e-mail existir, o código será enviado em instantes.");
+
+        } catch (error) {
+            console.error("Erro ao solicitar recuperação:", error);
+            
+            const mensagemErro = error.response?.data?.message || "Ops! Não foi possível conectar ao servidor.";
+            alert(mensagemErro); 
+        }
     };
 
     const handleValidarCodigo = async (e) => {
         e.preventDefault();
-        
         console.log("Validando código:", codigoValidacao);
     };
 
@@ -69,19 +120,26 @@ export default function IFoodLogin() {
                             </p>
                         </div>
 
-                        <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+                        {/* --- ATUALIZADO: onSubmit chamando handleLogin --- */}
+                        <form className="flex flex-col gap-4" onSubmit={handleLogin}>
+                            {/* --- ATUALIZADO: value e onChange adicionados --- */}
                             <input 
                                 type="email" 
                                 placeholder="E-mail" 
                                 required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 className="w-full p-4 rounded-xl border border-border bg-white focus:outline-none focus:border-color-ifood focus:ring-1 focus:ring-color-ifood transition-colors"
                             />
                             
                             <div className="flex flex-col gap-2">
+                                {/* --- ATUALIZADO: value e onChange adicionados --- */}
                                 <input 
                                     type="password" 
                                     placeholder="Senha" 
                                     required
+                                    value={senha}
+                                    onChange={(e) => setSenha(e.target.value)}
                                     className="w-full p-4 rounded-xl border border-border bg-white focus:outline-none focus:border-color-ifood focus:ring-1 focus:ring-color-ifood transition-colors"
                                 />
                                 <button 
@@ -94,11 +152,13 @@ export default function IFoodLogin() {
                             </div>
 
                             <div className="flex flex-col items-center gap-3 mt-2">
+                                {/* --- ATUALIZADO: desabilita enquanto carrega --- */}
                                 <button 
                                     type="submit" 
-                                    className="flex h-12 w-2/3 items-center justify-center rounded-xl border-none bg-ifood hover:bg-ifood-hover text-white font-extrabold text-lg transition-colors shadow-md"
+                                    disabled={carregando}
+                                    className="flex h-12 w-2/3 items-center justify-center rounded-xl border-none bg-ifood hover:bg-ifood-hover text-white font-extrabold text-lg transition-colors shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
-                                    Efetuar Login
+                                    {carregando ? 'Entrando...' : 'Efetuar Login'}
                                 </button>
 
                                 <div className="text-sm text-black mt-2">
@@ -143,6 +203,7 @@ export default function IFoodLogin() {
                 onClose={handleCloseModal} 
                 titulo="Recuperar Senha"
             >
+                {/* ... CONTEÚDO DO MODAL SE MANTÉM INTACTO ... */}
                 {etapaRecuperacao === 1 && (
                     <form className="flex flex-col gap-4" onSubmit={handleEnviarEmail}>
                         <p className="text-sm text-texto-principal">

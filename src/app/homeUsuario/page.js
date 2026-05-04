@@ -1,14 +1,48 @@
 'use client';
-import { useRef } from "react"; 
+import { useRef, useState, useEffect } from "react"; 
 import Image from "next/image";
 import Link from "next/link";
 import { FiSearch, FiChevronDown, FiUser, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { HiOutlineShoppingBag } from "react-icons/hi2";
 import { FaLocationDot } from "react-icons/fa6";
 import Header from "@/components/Header";
+import api from "@/utils/axios"; 
 
 export default function Home() {
     const carrosselRef = useRef(null);
+
+    const [restaurantes, setRestaurantes] = useState([]);
+    const [carregando, setCarregando] = useState(true);
+
+useEffect(() => {
+        const buscarRestaurantes = async () => {
+            try {
+                console.log("1. Iniciando o pedido para a cozinha...");
+                const resposta = await api.get('/restaurantes/get-all'); 
+                
+                console.log("2. 🔥 Resposta Completa do Axios:", resposta);
+                console.log("3. 🍔 Array que queremos salvar:", resposta.data?.data);
+
+                if (resposta.data && resposta.data.data) {
+                    setRestaurantes(resposta.data.data);
+                    console.log("4. ✅ Estado atualizado com sucesso!");
+                } else if (Array.isArray(resposta.data)) {
+                    setRestaurantes(resposta.data);
+                    console.log("4. ✅ Estado atualizado (formato direto)!");
+                } else {
+                    console.error("❌ O formato dos dados não é o esperado. Socorro!");
+                }
+
+            } catch (error) {
+                console.error("❌ Erro na requisição:", error);
+            } finally {
+                setCarregando(false);
+            }
+        };
+
+        buscarRestaurantes();
+    }, []);
+
 
     const categorias = [
         { id: 1, nome: "Brasileira", img: "/comidaBrasileira.png" },
@@ -20,17 +54,6 @@ export default function Home() {
         { id: 7, nome: "Saudável", img: "/saudavel.png" },
         { id: 8, nome: "Japonesa", img: "/sushi.png" },
         { id: 9, nome: "Francesa", img: "/italiano.png" },
-    ];
-
-    const pratos = [
-        { id: 1, nome: "Prato 1", img: "/prato1.png" },
-        { id: 2, nome: "Prato 2", img: "/prato2.png" },
-        { id: 3, nome: "Prato 3", img: "/prato3.png" },
-        { id: 4, nome: "Prato 4", img: "/prato4.png" },
-        { id: 5, nome: "Prato 5", img: "/prato5.png" },
-        { id: 6, nome: "Prato 6", img: "/prato6.png" },
-        { id: 7, nome: "Prato 7", img: "/prato7.png" },
-        { id: 8, nome: "Prato 8", img: "/prato8.png" },
     ];
 
     const banners = [
@@ -67,20 +90,12 @@ export default function Home() {
                             <FiChevronLeft size={24} />
                         </button>
 
-                        <div 
-                            ref={carrosselRef} 
-                            className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide py-4 px-2 snap-x snap-mandatory"
-                        >
+                        <div ref={carrosselRef} className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide py-4 px-2 snap-x snap-mandatory">
                             {categorias.map((categoria) => (
                                 <Link href={`/categoria/${categoria.nome.toLowerCase()}`} key={categoria.id} className="flex flex-col items-center gap-3 min-w-25 sm:min-w-30 snap-start group/item">
                                     <div className="w-24 h-20 sm:w-28 sm:h-24 bg-white rounded-2xl flex items-center justify-center p-2 group-hover/item:shadow-md transition-shadow relative overflow-hidden">
                                         <div className="w-full h-full bg-white rounded-xl flex items-center justify-center text-xs text-btn-delete">
-                                            <Image
-                                                src={categoria.img}
-                                                alt={categoria.nome}
-                                                fill
-                                                className="object-contain"
-                                            />
+                                            <Image src={categoria.img} alt={categoria.nome} fill className="object-contain" />
                                         </div>
                                     </div>
                                     <span className="text-sm font-medium text-btn-edit group-hover/item:text-gray-900 transition-colors text-center">
@@ -103,14 +118,7 @@ export default function Home() {
                     <div className="flex gap-4 overflow-x-auto scrollbar-hide py-2 snap-x snap-mandatory">
                         {banners.map((banner) => (
                             <div key={banner.id} className={`min-w-75 md:min-w-105 h-48 md:h-56 ${banner.bg} rounded-3xl snap-start relative overflow-hidden flex items-center justify-center text-white font-bold text-xl cursor-pointer hover:opacity-95 transition-opacity`}>
-                                
-                                <Image
-                                    src={banner.img}
-                                    alt={`Promoção ${banner.id}`}
-                                    fill
-                                    className="object-cover" 
-                                />
-                                
+                                <Image src={banner.img} alt={`Promoção ${banner.id}`} fill className="object-cover" />
                             </div>
                         ))}
                     </div>
@@ -119,26 +127,51 @@ export default function Home() {
                 <section>
                     <div className="flex items-end justify-between mb-6">
                         <div>
-                            <h2 className="text-xl font-bold text-gray-800">Desconto até 35% OFF</h2>
-                            <p className="text-sm text-gray-500 mt-1">Pratos incríveis com até 35% de desconto</p>
+                            <h2 className="text-xl font-bold text-gray-800">Restaurantes Disponíveis</h2>
+                            <p className="text-sm text-gray-500 mt-1">Os melhores lugares para matar sua fome</p>
                         </div>
-                        <Link href="/descontos" className="text-ifood font-semibold text-sm hover:underline">
-                            Ver mais
-                        </Link>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {pratos.map((item) => (
-                            <div key={item.id} className="h-40 border border-border rounded-xl bg-gray-50 flex items-center justify-center text-btn-edit">
-                                <Image
-                                    src={item.img}
-                                    alt={item.nome}
-                                    width={100}
-                                    height={100}
-                                    className="object-contain"
-                                />
-                            </div>
-                        ))}
-                    </div>
+
+                    {carregando ? (
+                        <div className="flex justify-center py-10">
+                            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-ifood"></div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {restaurantes.length > 0 ? (
+                                restaurantes.map((rest) => {
+                                    const listaImagens = rest.arquivos_cardapios || rest.arquivos_cardapio || [];
+                                    
+                                    const urlImagem = (listaImagens.length > 0 && listaImagens.caminho_arquivo) 
+                                        ? listaImagens.caminho_arquivo 
+                                        : "/FavFood.png"; 
+
+                                    return (
+                                        <div key={rest.id} className="border border-border rounded-xl bg-white flex flex-col overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                                            
+                                            {/* Parte superior: Imagem do Restaurante */}
+                                            <div className="relative h-32 w-full bg-gray-50">
+                                                <img 
+                                                    src={urlImagem} 
+                                                    alt={rest.nome_restaurante || "Imagem do restaurante"} 
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            
+                                            {/* Parte inferior: Informações */}
+                                            <div className="p-4 flex flex-col gap-1">
+                                                <h3 className="font-bold text-gray-800 truncate">{rest.nome_restaurante}</h3>
+                                                <p className="text-xs text-gray-500">Tempo: {rest.tempo_entrega}</p>
+                                                <p className="text-xs text-gray-500">Aberto: {rest.horario_atendimento}</p>
+                                            </div>
+                                        </div>
+                                    )
+                                })
+                            ) : (
+                                <p className="text-sm text-gray-500">Nenhum restaurante encontrado no momento.</p>
+                            )}
+                        </div>
+                    )}
                 </section>
             </main>
         </div>
