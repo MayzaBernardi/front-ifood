@@ -53,7 +53,7 @@ export default function PerfilUsuario() {
             const userStr = localStorage.getItem("@App:user");
             const usuario = JSON.parse(userStr);
 
-            const resposta = await api.put(`/pessoas/${usuario.id}`, {
+            const resposta = await api.patch(`/pessoas/update/${usuario.id}`, {
                 nome: formData.nome,
                 data_nascimento: formData.data_nascimento,
                 ...(formData.novaSenha && { senha: formData.novaSenha }) 

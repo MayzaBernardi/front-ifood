@@ -8,12 +8,18 @@ import Image from "next/image";
 
 export default function Header({ aoBuscar }) {
     const [menuAberto, setMenuAberto] = useState(false);
+    const [localizacaoAberta, setLocalizacaoAberta] = useState(false);
+    
     const menuRef = useRef(null);
+    const localizacaoRef = useRef(null);
 
     useEffect(() => {
         function lidarComCliqueFora(event) {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
                 setMenuAberto(false);
+            }
+            if (localizacaoRef.current && !localizacaoRef.current.contains(event.target)) {
+                setLocalizacaoAberta(false);
             }
         }
         
@@ -28,12 +34,14 @@ export default function Header({ aoBuscar }) {
         <header className="flex items-center justify-between px-8 py-4 bg-white border-b border-gray-100 sticky top-0 z-50">
             <div className="flex items-center gap-8">
                 <div className="relative w-40 h-20">
-                    <Image
-                        src="/FavFood.png"
-                        alt="Logo FavFood"
-                        fill
+                    <Link href="/homeUsuario">
+                        <Image
+                            src="/FavFood.png"
+                            alt="Logo FavFood"
+                            fill
                         className="object-contain"
                     />
+                    </Link>
                 </div>
             </div>
 
@@ -50,8 +58,31 @@ export default function Header({ aoBuscar }) {
             </div>
 
             <div className="flex items-center gap-6">
-                <div className="hidden lg:flex items-center gap-1 cursor-pointer hover:text-gray-600 transition-colors">
-                    <FaLocationDot className="text-ifood" size={20} />
+                
+                <div className="relative hidden lg:block" ref={localizacaoRef}>
+                    <button 
+                        onClick={() => setLocalizacaoAberta(!localizacaoAberta)}
+                        className={`flex items-center gap-2 p-2 rounded-full transition-colors ${localizacaoAberta ? 'bg-red-50' : 'hover:bg-gray-50'}`}
+                    >
+                        <FaLocationDot className="text-ifood" size={20} />
+                    </button>
+
+                    {localizacaoAberta && (
+                        <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-gray-100 flex flex-col py-1 overflow-hidden z-50">
+                            <div className="px-4 py-2 border-b border-gray-100 bg-gray-50">
+                                <p className="text-xs text-gray-500 font-medium">Onde você está?</p>
+                            </div>
+                            
+                            <button 
+                                onClick={() => {
+                                    setLocalizacaoAberta(false);
+                                }}
+                                className="px-4 py-3 text-sm font-semibold text-ifood hover:bg-red-50 transition-colors text-left"
+                            >
+                                + Adicionar localização
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="relative" ref={menuRef}>
@@ -79,7 +110,7 @@ export default function Header({ aoBuscar }) {
                             </Link>
                             
                             <Link 
-                                href="/pedidos" 
+                                href="/visualizarPedidos" 
                                 onClick={() => setMenuAberto(false)}
                                 className="px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-ifood flex items-center gap-3 transition-colors"
                             >

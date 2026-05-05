@@ -17,24 +17,17 @@ export default function Home() {
 useEffect(() => {
         const buscarRestaurantes = async () => {
             try {
-                console.log("1. Iniciando o pedido para a cozinha...");
                 const resposta = await api.get('/restaurantes/get-all'); 
                 
-                console.log("2. 🔥 Resposta Completa do Axios:", resposta);
-                console.log("3. 🍔 Array que queremos salvar:", resposta.data?.data);
-
-                if (resposta.data && resposta.data.data) {
-                    setRestaurantes(resposta.data.data);
-                    console.log("4. ✅ Estado atualizado com sucesso!");
-                } else if (Array.isArray(resposta.data)) {
-                    setRestaurantes(resposta.data);
-                    console.log("4. ✅ Estado atualizado (formato direto)!");
+                const lista = resposta.data?.data || resposta.data || [];
+                
+                if (Array.isArray(lista)) {
+                    setRestaurantes(lista);
                 } else {
-                    console.error("❌ O formato dos dados não é o esperado. Socorro!");
+                    console.error("Os dados não vieram como uma lista:", resposta);
                 }
-
             } catch (error) {
-                console.error("❌ Erro na requisição:", error);
+                console.error("Erro na requisição:", error);
             } finally {
                 setCarregando(false);
             }
@@ -42,7 +35,6 @@ useEffect(() => {
 
         buscarRestaurantes();
     }, []);
-
 
     const categorias = [
         { id: 1, nome: "Brasileira", img: "/comidaBrasileira.png" },
@@ -147,7 +139,11 @@ useEffect(() => {
                                         : "/FavFood.png"; 
 
                                     return (
-                                        <div key={rest.id} className="border border-border rounded-xl bg-white flex flex-col overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                                        <Link 
+                                            href={`/restaurante/${rest.id}`} 
+                                            key={rest.id} 
+                                            className="border border-border rounded-xl bg-white flex flex-col overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                                        >
                                             
                                             {/* Parte superior: Imagem do Restaurante */}
                                             <div className="relative h-32 w-full bg-gray-50">
@@ -164,7 +160,7 @@ useEffect(() => {
                                                 <p className="text-xs text-gray-500">Tempo: {rest.tempo_entrega}</p>
                                                 <p className="text-xs text-gray-500">Aberto: {rest.horario_atendimento}</p>
                                             </div>
-                                        </div>
+                                        </Link>
                                     )
                                 })
                             ) : (
