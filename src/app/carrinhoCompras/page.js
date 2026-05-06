@@ -1,25 +1,25 @@
 'use client';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FiX, FiTrash2 } from "react-icons/fi";
 import Header from "@/components/Header";
 import { HiOutlineShoppingBag } from "react-icons/hi";
+import { useCart } from "@/contexts/CartContext";
 
 export default function CarrinhoCompras() {
     const router = useRouter();
+    const [mounted, setMounted] = useState(false);
+    const { carrinho, limparCarrinho, valorTotal } = useCart();
 
-    // 1. Transformamos o mock em um useState para a tela reagir às mudanças
-    const [carrinho, setCarrinho] = useState([
-        { id: 1, nome: "Prato 1", preco: 29.90, img: "/prato1.png" },
-        { id: 2, nome: "Prato 2", preco: 39.90, img: "/prato2.png" },
-        { id: 3, nome: "Prato 3", preco: 19.90, img: "/prato3.png" },
-    ]);
+    useEffect(() => {
+        const frame = requestAnimationFrame(() => {
+            setMounted(true);
+        });
+        return () => cancelAnimationFrame(frame);
+    }, []);
 
-    // 2. Função para zerar a sacola
-    const limparCarrinho = () => {
-        setCarrinho([]);
-    };
+    if (!mounted) return <div className="min-h-screen bg-gray-50" />;
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
@@ -27,12 +27,10 @@ export default function CarrinhoCompras() {
             
             <main className="max-w-4xl mx-auto p-4 sm:p-8">
                 
-                {/* Cabeçalho do Carrinho */}
                 <div className="flex items-center justify-between mb-8 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                     <h1 className="text-2xl font-bold text-gray-800">Meu Carrinho</h1>
                     
                     <div className="flex items-center gap-3 sm:gap-6">
-                        {/* O botão Limpar só aparece se tiver itens no carrinho */}
                         {carrinho.length > 0 && (
                             <button 
                                 onClick={limparCarrinho}
@@ -43,7 +41,6 @@ export default function CarrinhoCompras() {
                             </button>
                         )}
                         
-                        {/* Botão de Fechar (Voltar) */}
                         <button 
                             onClick={() => router.back()} 
                             className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 text-gray-600 transition-colors"
@@ -54,33 +51,51 @@ export default function CarrinhoCompras() {
                     </div>
                 </div>
 
-                {/* Área dos Itens */}
                 {carrinho.length > 0 ? (
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-6">
-                        {/* Renderizando os itens para você ver a função limpar funcionando */}
+                        
                         {carrinho.map(item => (
                             <div key={item.id} className="flex items-center justify-between border-b border-gray-50 pb-4 last:border-0 last:pb-0">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 bg-gray-100 rounded-xl relative overflow-hidden flex items-center justify-center">
-                                        {/* Usando img HTML para evitar erros de domínio do Next.js temporariamente */}
-                                        <img src={item.img} alt={item.nome} className="object-cover w-full h-full" onError={(e) => e.target.src = '/FavFood.png'} />
+                                    <div className="w-16 h-16 bg-gray-100 rounded-xl relative overflow-hidden flex items-center justify-center font-bold text-gray-400">
+                                        {item.quantidade}x
                                     </div>
                                     <div className="flex flex-col">
                                         <h3 className="font-bold text-gray-800">{item.nome}</h3>
-                                        <p className="text-[#ea1d2c] font-bold">R$ {item.preco.toFixed(2).replace('.', ',')}</p>
+                                        <p className="text-sm text-gray-500">{item.descricao?.substring(0, 40)}...</p>
+                                        <p className="text-ifood font-bold mt-1">
+                                            {(item.preco * item.quantidade).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         ))}
                         
+                        <div className="border-t border-gray-100 pt-4 flex flex-col items-end gap-2">
+                            <div className="flex justify-between w-full max-w-xs text-gray-600">
+                                <span>Subtotal</span>
+                                <span>{valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                            </div>
+                            <div className="flex justify-between w-full max-w-xs text-gray-600">
+                                <span>Taxa de Entrega</span>
+                                <span className="text-green-600 font-medium">Grátis</span>
+                            </div>
+                            <div className="flex justify-between w-full max-w-xs text-xl font-bold text-gray-800 mt-2">
+                                <span>Total</span>
+                                <span>{valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                            </div>
+                        </div>
+
                         <div className="pt-4 flex justify-end">
-                                <button className="bg-[#ea1d2c] text-white font-bold py-3 px-8 rounded-xl hover:bg-[#c91825] transition-colors shadow-sm">
+                                <button 
+                                    onClick={() => router.push('/checkoutPedido')}
+                                    className="bg-ifood text-white font-bold py-4 px-10 rounded-xl hover:bg-ifood-hover transition-colors shadow-sm w-full sm:w-auto text-lg"
+                                >
                                     Finalizar Pedido
                                 </button>
                         </div>
                     </div>
                 ) : (
-                    // Mensagem de Carrinho Vazio
                     <div className="text-center py-24 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
                         <HiOutlineShoppingBag size={64} className="text-gray-300 mb-4" />
                         <h2 className="text-xl font-bold text-gray-800 mb-2">Sua sacola está vazia</h2>

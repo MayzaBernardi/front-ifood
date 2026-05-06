@@ -4,11 +4,16 @@ import { useParams, useRouter } from "next/navigation";
 import { FiChevronLeft, FiPlus } from "react-icons/fi";
 import api from "@/utils/axios";
 import Header from "@/components/Header";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "react-toastify";
+
+
 
 export default function TelaRestaurante() {
     const params = useParams();
     const router = useRouter();
     const id_restaurante = params.id; 
+    const { adicionarAoCarrinho } = useCart();
 
     const [cardapio, setCardapio] = useState([]);
     const [carregando, setCarregando] = useState(true);
@@ -51,41 +56,28 @@ export default function TelaRestaurante() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {cardapio.length > 0 ? (
-                            cardapio.map((prato) => {
-                                const listaImagens = prato.arquivos_cardapios || prato.arquivos || prato.arquivos_cardapio || [];
-                                const urlImagem = (listaImagens.length > 0 && listaImagens[0].caminho_arquivo) 
-                                ? listaImagens[0].caminho_arquivo 
-                                : "/FavFood.png"; 
-
-                            console.log("Foto do prato:", prato.nome_prato, " -> URL:", urlImagem); 
-
-                                return (
-                                    <div key={prato.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center hover:shadow-md transition-shadow">
-                                        <div className="flex items-center gap-4"> 
-                                            <div className="w-24 h-24 flex-shrink-0 relative rounded-lg overflow-hidden border border-gray-100">
-                                                <img 
-                                                    src={urlImagem} 
-                                                    alt={prato.nome_prato} 
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <h3 className="font-bold text-gray-800">{prato.nome_prato}</h3>
-                                                <p className="text-ifood font-semibold mt-1">
-                                                    R$ {prato.preco.toFixed(2).replace('.', ',')}
-                                                </p>
-                                            </div>
+                            cardapio.map((item) => (
+                                    <div key={item.id} className="flex justify-between items-center p-4 border-b">
+                                        <div>
+                                            <h4 className="font-bold">{item.nome_prato}</h4>
+                                            <p className="text-sm text-gray-500">{item.descricao}</p>
+                                            <span className="text-gray-800 font-medium">
+                                                {item.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                            </span>
                                         </div>
-                                        
+
                                         <button 
-                                            onClick={() => adicionarAoCarrinho(prato)}
+                                            onClick={() => {
+                                                adicionarAoCarrinho(item);
+                                                toast.success(`${item.nome_prato} adicionado!`);
+                                            }}
                                             className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-ifood hover:bg-red-50 hover:border-red-100 transition-colors"
                                         >
-                                            <FiPlus size={20} adicionarAoCarrinho={adicionarAoCarrinho} />
+                                            <FiPlus size={20} />
                                         </button>
                                     </div>
-                                );
-                            })
+                                )
+                            )
                         ) : (
                             <p className="text-gray-500">Nenhum prato encontrado neste restaurante.</p>
                         )}

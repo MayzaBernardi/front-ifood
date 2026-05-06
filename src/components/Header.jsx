@@ -10,6 +10,7 @@ import { useCart } from "@/contexts/CartContext";
 export default function Header({ aoBuscar }) {
     const [menuAberto, setMenuAberto] = useState(false);
     const [localizacaoAberta, setLocalizacaoAberta] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     const { totalItens, valorTotal } = useCart();
     
@@ -17,6 +18,10 @@ export default function Header({ aoBuscar }) {
     const localizacaoRef = useRef(null);
 
     useEffect(() => {
+        const frame = requestAnimationFrame(() => {
+            setMounted(true);
+        });
+        
         function lidarComCliqueFora(event) {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
                 setMenuAberto(false);
@@ -29,6 +34,7 @@ export default function Header({ aoBuscar }) {
         document.addEventListener("mousedown", lidarComCliqueFora);
         
         return () => {
+            cancelAnimationFrame(frame);
             document.removeEventListener("mousedown", lidarComCliqueFora);
         };
     }, []);
@@ -42,8 +48,8 @@ export default function Header({ aoBuscar }) {
                             src="/FavFood.png"
                             alt="Logo FavFood"
                             fill
-                        className="object-contain"
-                    />
+                            className="object-contain"
+                        />
                     </Link>
                 </div>
             </div>
@@ -112,27 +118,19 @@ export default function Header({ aoBuscar }) {
                                 Visualizar Pedidos
                             </Link>
 
-                            <Link 
-                                href="/pagamentos" 
-                                onClick={() => setMenuAberto(false)}
-                                className="px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-ifood flex items-center gap-3 transition-colors"
-                            >
-                                <FiCreditCard size={18} />
-                                Gerenciar Pagamentos
-                            </Link>
-
                             <hr className="my-1 border-gray-100" />
 
-                            <button 
+                            <Link 
+                                href="/" 
                                 onClick={() => {
-                                    setMenuAberto(false);
+                                    setMenuAberto(false); 
                                     console.log("Saindo da conta..."); 
                                 }}
                                 className="px-4 py-3 text-sm text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors text-left w-full"
                             >
                                 <FiLogOut size={18} />
                                 Sair da conta
-                            </button>
+                            </Link>
                         </div>
                     )}
                 </div>
@@ -140,11 +138,19 @@ export default function Header({ aoBuscar }) {
                 <Link href="/carrinhoCompras" className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
                     <div className="relative">
                         <HiOutlineShoppingBag className="text-ifood" size={28} />
-                        <span className="absolute -top-1 -right-1 bg-ifood text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">{totalItens}</span>
+                        {mounted && totalItens > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-ifood text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                {totalItens}
+                            </span>
+                        )}
                     </div>
                     <div className="flex flex-col items-start sm:flex">
-                        <span className="text-sm font-semibold">R$ {valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                        <span className="text-xs text-btn-edit">{totalItens} itens</span>
+                        <span className="text-sm font-semibold">
+                            {mounted ? valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'}
+                        </span>
+                        <span className="text-xs text-btn-edit">
+                            {mounted ? `${totalItens} itens` : '0 itens'}
+                        </span>
                     </div>
                 </Link>
             </div>

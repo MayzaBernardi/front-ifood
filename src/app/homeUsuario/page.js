@@ -11,10 +11,14 @@ import api from "@/utils/axios";
 export default function Home() {
     const carrosselRef = useRef(null);
 
+    // ESTADOS ORIGINAIS
     const [restaurantes, setRestaurantes] = useState([]);
     const [carregando, setCarregando] = useState(true);
+    
+    // NOVO ESTADO: Guarda o texto digitado na pesquisa
+    const [termoBusca, setTermoBusca] = useState("");
 
-useEffect(() => {
+    useEffect(() => {
         const buscarRestaurantes = async () => {
             try {
                 const resposta = await api.get('/restaurantes/get-all'); 
@@ -35,6 +39,13 @@ useEffect(() => {
 
         buscarRestaurantes();
     }, []);
+
+    const buscaMinuscula = termoBusca.toLowerCase().trim();
+    const restaurantesFiltrados = restaurantes.filter((rest) => {
+        if (!buscaMinuscula) return true; // Se a barra estiver vazia, mostra todos
+        
+        return rest.nome_restaurante?.toLowerCase().includes(buscaMinuscula);
+    });
 
     const categorias = [
         { id: 1, nome: "Brasileira", img: "/comidaBrasileira.png" },
@@ -67,60 +78,70 @@ useEffect(() => {
 
     return (
         <div className="min-h-screen bg-white font-sans text-gray-800">
-            <Header />
+            <Header aoBuscar={setTermoBusca} />
+            
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <section className="mb-12">
-                    <h1 className="text-2xl font-bold text-gray-800 mb-6">
-                        Pedir seu delivery é rápido e prático! Conheça as categorias
-                    </h1>
-                    
-                    <div className="relative group">
-                        <button 
-                            onClick={scrollLeft} 
-                            className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 bg-white shadow-md rounded-full p-2 text-gray-400 hover:text-[#ea1d2c] transition-colors hidden md:block"
-                        >
-                            <FiChevronLeft size={24} />
-                        </button>
+                
+                {!termoBusca && (
+                    <>
+                        <section className="mb-12">
+                            <h1 className="text-2xl font-bold text-gray-800 mb-6">
+                                Pedir seu delivery é rápido e prático! Conheça as categorias
+                            </h1>
+                            
+                            <div className="relative group">
+                                <button 
+                                    onClick={scrollLeft} 
+                                    className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 bg-white shadow-md rounded-full p-2 text-gray-400 hover:text-[#ea1d2c] transition-colors hidden md:block"
+                                >
+                                    <FiChevronLeft size={24} />
+                                </button>
 
-                        <div ref={carrosselRef} className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide py-4 px-2 snap-x snap-mandatory">
-                            {categorias.map((categoria) => (
-                                <Link href={`/categoria/${categoria.nome.toLowerCase()}`} key={categoria.id} className="flex flex-col items-center gap-3 min-w-25 sm:min-w-30 snap-start group/item">
-                                    <div className="w-24 h-20 sm:w-28 sm:h-24 bg-white rounded-2xl flex items-center justify-center p-2 group-hover/item:shadow-md transition-shadow relative overflow-hidden">
-                                        <div className="w-full h-full bg-white rounded-xl flex items-center justify-center text-xs text-btn-delete">
-                                            <Image src={categoria.img} alt={categoria.nome} fill className="object-contain" />
-                                        </div>
-                                    </div>
-                                    <span className="text-sm font-medium text-btn-edit group-hover/item:text-gray-900 transition-colors text-center">
-                                        {categoria.nome}
-                                    </span>
-                                </Link>
-                            ))}
-                        </div>
+                                <div ref={carrosselRef} className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide py-4 px-2 snap-x snap-mandatory">
+                                    {categorias.map((categoria) => (
+                                        <Link href={`/categoria/${categoria.nome.toLowerCase()}`} key={categoria.id} className="flex flex-col items-center gap-3 min-w-25 sm:min-w-30 snap-start group/item">
+                                            <div className="w-24 h-20 sm:w-28 sm:h-24 bg-white rounded-2xl flex items-center justify-center p-2 group-hover/item:shadow-md transition-shadow relative overflow-hidden">
+                                                <div className="w-full h-full bg-white rounded-xl flex items-center justify-center text-xs text-btn-delete">
+                                                    <Image src={categoria.img} alt={categoria.nome} fill className="object-contain" />
+                                                </div>
+                                            </div>
+                                            <span className="text-sm font-medium text-btn-edit group-hover/item:text-gray-900 transition-colors text-center">
+                                                {categoria.nome}
+                                            </span>
+                                        </Link>
+                                    ))}
+                                </div>
 
-                        <button 
-                            onClick={scrollRight} 
-                            className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10 bg-white shadow-md rounded-full p-2 text-btn-delete hover:text-ifood transition-colors hidden md:block"
-                        >
-                            <FiChevronRight size={24} />
-                        </button>
-                    </div>
-                </section>
-
-                <section className="mb-12">
-                    <div className="flex gap-4 overflow-x-auto scrollbar-hide py-2 snap-x snap-mandatory">
-                        {banners.map((banner) => (
-                            <div key={banner.id} className={`min-w-75 md:min-w-105 h-48 md:h-56 ${banner.bg} rounded-3xl snap-start relative overflow-hidden flex items-center justify-center text-white font-bold text-xl cursor-pointer hover:opacity-95 transition-opacity`}>
-                                <Image src={banner.img} alt={`Promoção ${banner.id}`} fill className="object-cover" />
+                                <button 
+                                    onClick={scrollRight} 
+                                    className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10 bg-white shadow-md rounded-full p-2 text-btn-delete hover:text-ifood transition-colors hidden md:block"
+                                >
+                                    <FiChevronRight size={24} />
+                                </button>
                             </div>
-                        ))}
-                    </div>
-                </section>
+                        </section>
+
+                        <section className="mb-12">
+                            <div className="flex gap-4 overflow-x-auto scrollbar-hide py-2 snap-x snap-mandatory">
+                                {banners.map((banner) => (
+                                    <div key={banner.id} className={`min-w-75 md:min-w-105 h-48 md:h-56 ${banner.bg} rounded-3xl snap-start relative overflow-hidden flex items-center justify-center text-white font-bold text-xl cursor-pointer hover:opacity-95 transition-opacity`}>
+                                        <Image src={banner.img} alt={`Promoção ${banner.id}`} fill className="object-cover" />
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    </>
+                )}
 
                 <section>
                     <div className="flex items-end justify-between mb-6">
                         <div>
-                            <h2 className="text-xl font-bold text-gray-800">Restaurantes Disponíveis</h2>
-                            <p className="text-sm text-gray-500 mt-1">Os melhores lugares para matar sua fome</p>
+                            <h2 className="text-xl font-bold text-gray-800">
+                                {termoBusca ? `Resultados para "${termoBusca}"` : "Restaurantes Disponíveis"}
+                            </h2>
+                            {!termoBusca && (
+                                <p className="text-sm text-gray-500 mt-1">Os melhores lugares para matar sua fome</p>
+                            )}
                         </div>
                     </div>
 
@@ -130,8 +151,8 @@ useEffect(() => {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {restaurantes.length > 0 ? (
-                                restaurantes.map((rest) => {
+                            {restaurantesFiltrados.length > 0 ? (
+                                restaurantesFiltrados.map((rest) => {
                                     const listaImagens = rest.arquivos_cardapios || rest.arquivos_cardapio || [];
                                     
                                     const urlImagem = (listaImagens.length > 0 && listaImagens.caminho_arquivo) 
@@ -145,7 +166,6 @@ useEffect(() => {
                                             className="border border-border rounded-xl bg-white flex flex-col overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                                         >
                                             
-                                            {/* Parte superior: Imagem do Restaurante */}
                                             <div className="relative h-32 w-full bg-gray-50">
                                                 <img 
                                                     src={urlImagem} 
@@ -154,7 +174,6 @@ useEffect(() => {
                                                 />
                                             </div>
                                             
-                                            {/* Parte inferior: Informações */}
                                             <div className="p-4 flex flex-col gap-1">
                                                 <h3 className="font-bold text-gray-800 truncate">{rest.nome_restaurante}</h3>
                                                 <p className="text-xs text-gray-500">Tempo: {rest.tempo_entrega}</p>
@@ -164,7 +183,7 @@ useEffect(() => {
                                     )
                                 })
                             ) : (
-                                <p className="text-sm text-gray-500">Nenhum restaurante encontrado no momento.</p>
+                                <p className="text-sm text-gray-500 col-span-full">Nenhum restaurante encontrado com {termoBusca}.</p>
                             )}
                         </div>
                     )}

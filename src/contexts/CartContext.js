@@ -4,28 +4,26 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-    const [carrinho, setCarrinho] = useState([]);
-
-    useEffect(() => {
-        const salvo = localStorage.getItem('@iFood:carrinho');
-        if (salvo) setCarrinho(JSON.parse(salvo));
-    }, []);
+    const [carrinho, setCarrinho] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const salvo = localStorage.getItem('@iFood:carrinho');
+            return salvo ? JSON.parse(salvo) : [];
+        }
+        return [];
+    });
 
     useEffect(() => {
         localStorage.setItem('@iFood:carrinho', JSON.stringify(carrinho));
     }, [carrinho]);
 
     const adicionarAoCarrinho = (produto) => {
-    if (carrinho.length > 0 && carrinho[0].id_restaurante !== produto.id_restaurante) {
-        const confirmar = window.confirm(
-            "Você já tem itens de outro restaurante na sacola. Deseja esvaziar a sacola atual para adicionar este item?"
-        );
-
-        if (confirmar) {
-            setCarrinho([{ ...produto, quantidade: 1 }]);
+        if (carrinho.length > 0 && carrinho.id_restaurante !== produto.id_restaurante) {
+            const confirmar = window.confirm(
+                "Você já tem itens de outro restaurante na sacola. Deseja esvaziar a sacola atual para adicionar este prato?"
+            );
+            if (confirmar) setCarrinho([{ ...produto, quantidade: 1 }]);
+            return;
         }
-        return; 
-    }
 
         setCarrinho((prev) => {
             const itemExiste = prev.find(item => item.id === produto.id);
