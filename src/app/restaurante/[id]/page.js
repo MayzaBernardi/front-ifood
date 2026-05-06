@@ -78,10 +78,10 @@ export default function TelaRestaurante() {
                                         </div>
                                         
                                         <button 
-                                            onClick={() => console.log("Adicionar prato", prato.id)}
+                                            onClick={() => adicionarAoCarrinho(prato)}
                                             className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-ifood hover:bg-red-50 hover:border-red-100 transition-colors"
                                         >
-                                            <FiPlus size={20} />
+                                            <FiPlus size={20} adicionarAoCarrinho={adicionarAoCarrinho} />
                                         </button>
                                     </div>
                                 );

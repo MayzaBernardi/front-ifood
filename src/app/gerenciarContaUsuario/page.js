@@ -1,13 +1,20 @@
 'use client';
 import { useState, useEffect } from "react";
+import dynamic from 'next/dynamic';
 import Header from "@/components/Header";
 import { FiUser, FiMail, FiCalendar, FiLock, FiCreditCard, FiMapPin, FiChevronRight } from "react-icons/fi";
 import { toast } from "react-toastify";
 import api from "@/utils/axios";
 
+const Mapa = dynamic(() => import('@/components/MapaLocalizacao'), { 
+    ssr: false,
+    loading: () => <div className="h-80 bg-gray-100 animate-pulse rounded-2xl mt-4" />
+});
+
 export default function PerfilUsuario() {
     const [isLoading, setIsLoading] = useState(false);
     const [abaAtiva, setAbaAtiva] = useState("dados");
+    const [coordenadas, setCoordenadas] = useState(null);
     
     const [formData, setFormData] = useState({
         nome: "",
@@ -29,7 +36,7 @@ export default function PerfilUsuario() {
                         nome: usuario.nome || "",
                         email: usuario.email || "",
                         cpf: usuario.cpf || "",
-                        data_nascimento: usuario.data_nascimento ? usuario.data_nascimento.split('T')[0] : ""
+                        data_nascimento: usuario.data_nascimento ? usuario.data_nascimento.split('T') : ""
                     }));
                 }
             } catch (error) {
@@ -53,7 +60,7 @@ export default function PerfilUsuario() {
             const userStr = localStorage.getItem("@App:user");
             const usuario = JSON.parse(userStr);
 
-            const resposta = await api.patch(`/pessoas/update/${usuario.id}`, {
+            await api.patch(`/pessoas/update/${usuario.id}`, {
                 nome: formData.nome,
                 data_nascimento: formData.data_nascimento,
                 ...(formData.novaSenha && { senha: formData.novaSenha }) 
@@ -114,7 +121,6 @@ export default function PerfilUsuario() {
                             </div>
 
                             <form onSubmit={handleSalvarDados} className="p-6 md:p-8 flex flex-col gap-6">
-                                
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="flex flex-col gap-2">
                                         <label className="text-sm font-semibold text-gray-700">Nome Completo</label>
@@ -200,7 +206,7 @@ export default function PerfilUsuario() {
                                     <button 
                                         type="submit" 
                                         disabled={isLoading}
-                                        className="bg-ifood text-white font-bold py-3 px-8 rounded-xl hover:bg-ifood transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                                        className="bg-[#ea1d2c] text-white font-bold py-3 px-8 rounded-xl hover:opacity-90 transition-opacity shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
                                     >
                                         {isLoading ? "Salvando..." : "Salvar Alterações"}
                                     </button>
@@ -210,13 +216,30 @@ export default function PerfilUsuario() {
                     )}
 
                     {abaAtiva === "enderecos" && (
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex flex-col items-center justify-center text-center h-96">
-                            <FiMapPin size={48} className="text-gray-300 mb-4" />
-                            <h3 className="text-xl font-bold text-gray-800 mb-2">Nenhum endereço cadastrado</h3>
-                            <p className="text-gray-500 max-w-sm mb-6">Adicione um endereço para facilitar a entrega dos seus próximos pedidos.</p>
-                            <button className="border-2 border-ifood text-ifood-hover font-bold py-2 px-6 rounded-xl hover:bg-ifood transition-colors">
-                                Adicionar Endereço
-                            </button>
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                             <div className="p-6 md:p-8 border-b border-gray-100">
+                                <h3 className="text-2xl font-bold text-gray-800">Meus Endereços</h3>
+                                <p className="text-sm text-gray-500 mt-1">Clique no mapa para definir sua localização de entrega.</p>
+                            </div>
+                            
+                            <div className="p-6 md:p-8">
+                                <Mapa aoSelecionar={(coord) => setCoordenadas(coord)} />
+
+                                {coordenadas && (
+                                    <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-600 font-medium text-sm">
+                                        <FiMapPin />
+                                        Localização marcada: {coordenadas.lat.toFixed(5)}, {coordenadas.lng.toFixed(5)}
+                                    </div>
+                                )}
+
+                                <button 
+                                    className="mt-8 w-full bg-[#ea1d2c] text-white font-bold py-4 rounded-xl hover:opacity-90 transition-opacity shadow-md disabled:opacity-50"
+                                    onClick={() => coordenadas && toast.info("Localização capturada com sucesso!")}
+                                    disabled={!coordenadas}
+                                >
+                                    Confirmar Novo Endereço
+                                </button>
+                            </div>
                         </div>
                     )}
                 </section>
