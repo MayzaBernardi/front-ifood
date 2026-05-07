@@ -11,11 +11,9 @@ import api from "@/utils/axios";
 export default function Home() {
     const carrosselRef = useRef(null);
 
-    // ESTADOS ORIGINAIS
     const [restaurantes, setRestaurantes] = useState([]);
     const [carregando, setCarregando] = useState(true);
     
-    // NOVO ESTADO: Guarda o texto digitado na pesquisa
     const [termoBusca, setTermoBusca] = useState("");
 
     useEffect(() => {
