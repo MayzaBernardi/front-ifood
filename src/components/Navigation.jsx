@@ -41,7 +41,7 @@ export default function Navigation() {
 
                     <nav className="flex flex-col gap-2">
                         <Link 
-                            href="/" 
+                            href="/homeRestaurante" 
                             className="flex items-center gap-3 p-3 rounded-lg text-gray-700 font-medium hover:bg-red-50 hover:text-ifood transition-colors" 
                             onClick={() => setSidebarOpen(false)}
                         >
@@ -62,7 +62,7 @@ export default function Navigation() {
                             <BiSolidFoodMenu size={20} /> Gerenciar Cardápio
                         </Link>
                         <Link 
-                            href="/Entregadores" 
+                            href="/chamarEntregadores" 
                             className="flex items-center gap-3 p-3 rounded-lg text-gray-700 font-medium hover:bg-red-50 hover:text-ifood transition-colors" 
                             onClick={() => setSidebarOpen(false)}
                         >

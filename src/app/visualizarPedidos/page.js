@@ -14,6 +14,7 @@ import {
 
 import Header from "@/components/Header";
 import api from "@/utils/axios";
+import Link from "next/link";
 
 export default function VisualizarPedidos() {
     const router = useRouter();
@@ -95,13 +96,10 @@ export default function VisualizarPedidos() {
 
             <main className="max-w-5xl mx-auto p-4 sm:p-8">
 
-                <button
-                    onClick={() => router.back()}
-                    className="flex items-center gap-2 text-gray-500 hover:text-[#ea1d2c] mb-6 transition-colors font-medium"
-                >
-                    <FiChevronLeft size={20} />
-                    Voltar
-                </button>
+                    <Link href="/homeUsuario" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4 transition-colors">
+                        <FiChevronLeft size={20} />
+                        Voltar
+                    </Link>
 
                 <h1 className="text-2xl font-bold mb-8">
                     Meus Pedidos

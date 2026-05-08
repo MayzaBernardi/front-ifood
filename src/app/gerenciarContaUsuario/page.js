@@ -143,6 +143,22 @@ export default function PerfilUsuario() {
         }
     };
 
+    const handleExcluirEndereco = async (enderecoId) => {
+        if (!confirm("Tem certeza que deseja excluir este endereço?")) return;
+        setIsLoading(true);
+        try {
+            await api.delete(`/enderecos/${enderecoId}`);
+            toast.success("Endereço excluído!");
+            const userStr = localStorage.getItem("@App:user");
+            const usuario = JSON.parse(userStr);
+            buscarEnderecos(usuario.id);
+        } catch (error) {
+            toast.error("Erro ao excluir endereço.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
             <Header />
@@ -278,7 +294,7 @@ export default function PerfilUsuario() {
                                                         <p className="text-xs text-gray-500">{end.cidade} - {end.estado}</p>
                                                     </div>
                                                 </div>
-                                                <button className="text-gray-400 hover:text-red-500"><FiTrash2 size={18}/></button>
+                                                <button onClick={() => handleExcluirEndereco(end.id)} className="text-gray-400 hover:text-red-500"><FiTrash2 size={18}/></button>
                                             </div>
                                         ))
                                     ) : (

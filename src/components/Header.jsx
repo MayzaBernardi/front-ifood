@@ -79,7 +79,10 @@ export default function Header({ aoBuscar }) {
                     {localizacaoAberta && (
                         <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-gray-100 flex flex-col py-1 overflow-hidden z-50">
                             <div className="px-4 py-2 border-b border-gray-100 bg-gray-50">
-                                <p className="text-xs text-gray-500 font-medium">Onde você está?</p>
+                                <Link href="/gerenciarContaUsuario" className="text-sm text-gray-700 hover:text-ifood flex items-center gap-2 transition-colors">
+                                    <FiSettings size={18} />
+                                    Gerenciar Endereços
+                                </Link>
                             </div>
                         </div>
                     )}
